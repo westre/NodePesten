@@ -4,40 +4,58 @@ app.use(express.static('public'));
 var server = app.listen(3000);
 var io = require('socket.io').listen(server);
 
-var players = {};
+var servers = [ {name: 'testsrv1', players: {}}, {name: 'testsrv2', players: {}}, {name: 'testsrv3', players: {}} ];
 
 io.on('connection', function (socket) {
-	// een speler heeft connectie gemaakt
-	socket.on('join', function (data) {
-		// voeg toe aan spelers array
-		players[socket.id] = {
-			name: data.name
-		};
-		
-		console.log("'join' commando gekregen van " + players[socket.id].name);
-		
-		// stuur daarna een 'chat' commando naar alle clients
-		io.emit('chat', {
-			message: players[socket.id].name + " heeft connectie gemaakt"
-		});
+    // misschien is dit niet nodig   
+    socket.on('add_server', function (data) {
+		servers.push(data);
+        
+        console.log('add_server: ' + data.name);
 	});
-	
-	// wanneer een speler de verbinding heeft gesloten
-	socket.on('disconnect', function () {
-		if (players[socket.id] != null) {
-			console.log("'disconnect' commando gekregen van " + players[socket.id].name);
-			
-			players[socket.id] = null;
-		}
+    
+    socket.on('request_servers', function (fn) {
+        fn(servers);
+        
+        console.log('request_servers: ' + servers.length);
 	});
-	
-	// wanneer we een 'chat' commando krijgen van een client
-	socket.on('chat', function (message) {
-		console.log("'chat' commando gekregen van " + players[socket.id].name);
-		
-		// versturen we het commando genaamd 'chat' naar alle clients
-		io.emit('chat', {
-			message: players[socket.id].name + ": " + message
-		});
+    
+    socket.on('join_server', function (data) {
+        socket.join(data.server);
+        
+        var joinedServer = getServerByName(data.server);     
+        joinedServer.players[socket.id] = {
+            name: data.player
+        };
+        
+        console.log('join_server: ' + data.server + ', aantal spelers: ' + Object.keys(joinedServer.players).length);
+	});
+    
+    socket.on('leave_server', function (server) {
+        socket.leave(server);
+        
+        var leftServer = getServerByName(server);     
+        delete leftServer.players[socket.id];
+        
+        console.log('leave_server: ' + server + ', aantal spelers: ' + Object.keys(leftServer.players).length);
+	});
+    
+    socket.on('send_message', function (data) {
+        // stuur data naar de server door .to methode
+        io.to(data.server).emit('message', data.message);
+        
+        console.log('send_message: ' + data.message + " to: " + data.server);
 	});
 });
+
+function getServerByName(name) {
+    var found = null;
+    
+    servers.forEach(function (server) {
+        if(server.name == name) {
+            found = server;
+        } 
+    });
+    
+    return found;  
+}

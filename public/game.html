@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Title of the document</title>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/jquery-2.2.1.min.js"></script>
+        <script src="client.js"></script>
+	</head>
+
+	<body>        
+		<script>
+            $(document).ready(function () {
+                joinServer();  
+            });         
+        </script>
+        
+        <h1>Pagina waar het spel gespeeld wordt</h1>
+        <h2 class="server-name"></h2>
+        
+        <div class="chatbox">
+            <div class="chatbox-messages">
+                <ul>
+                    
+                </ul>
+            </div>
+            <input class="chatbox-input" type="text">
+        </div>
+        
+        <button class="leave-server">disconnect van server</button>
+	</body>
+</html>
