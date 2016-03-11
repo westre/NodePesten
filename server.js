@@ -4,16 +4,9 @@ app.use(express.static('public'));
 var server = app.listen(3000);
 var io = require('socket.io').listen(server);
 
-var servers = [ {name: 'testsrv1', players: {}}, {name: 'testsrv2', players: {}}, {name: 'testsrv3', players: {}} ];
+var servers = [ {name: 'Kamer 1', players: {}}, {name: 'Kamer 2', players: {}}, {name: 'Kamer 3', players: {}} ];
 
-io.on('connection', function (socket) {
-    // misschien is dit niet nodig   
-    socket.on('add_server', function (data) {
-		servers.push(data);
-        
-        console.log('add_server: ' + data.name);
-	});
-    
+io.on('connection', function (socket) {    
     socket.on('request_servers', function (fn) {
         fn(servers);
         
@@ -46,6 +39,11 @@ io.on('connection', function (socket) {
         
         console.log('send_message: ' + data.message + " to: " + data.server);
 	});
+    
+    socket.on('disconnect', function() {
+        // http://stackoverflow.com/questions/20260170/handle-browser-reload-socket-io
+        console.log('disconnect: ' + socket.rooms.length);
+    });
 });
 
 function getServerByName(name) {
