@@ -4,6 +4,9 @@ app.use(express.static('public'));
 var server = app.listen(3000);
 var io = require('socket.io').listen(server);
 
+// johnnys gamejs
+eval(require('fs').readFileSync('game.js').toString());
+
 var servers = [ 
     { name: 'Kamer 1', players: {}, state: 'lobby' }, 
     { name: 'Kamer 2', players: {}, state: 'lobby' }, 
@@ -91,6 +94,10 @@ io.on('connection', function (socket) {
         // todo: server-side check of gozert wel echt de host is
         var theServer = getServerByName(server);
         theServer.state = 'playing';
+        
+        // initializeer spel logica
+        var cards = create(2);
+        console.log(cards.length);
               
         io.to(server).emit('game_has_started');
         
