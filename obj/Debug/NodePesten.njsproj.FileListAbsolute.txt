@@ -1,2 +1,0 @@
-E:\_Sorted\Projects\Web Developing\NodePesten\obj\Debug\NodePesten.njsprojResolveAssemblyReference.cache
-E:\_Sorted\Projects\Web Developing\NodePesten\bin\Microsoft.NodejsTools.WebRole.dll
