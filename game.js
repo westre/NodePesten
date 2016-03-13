@@ -50,11 +50,11 @@ function shuffle() {
 
 // Van de stapel afpakken
 // Huidige pack, aantal, kaarten op de hand
-function draw(amount, hand) {
+function draw(pack, amount) {
 	var drawedCards = [];
 	drawedCards = pack.slice(0, amount); // Haal x kaarten uit de stapel en sla deze op
 	pack.splice(0, amount); // Haal de kaarten uit de stapel
 	
-	hand.push.apply(hand, drawedCards); // Voeg de kaarten toe aan de kaarten op de hand
-	return hand;
+	//hand.push.apply(hand, drawedCards); // Voeg de kaarten toe aan de kaarten op de hand
+	return drawedCards;
 }

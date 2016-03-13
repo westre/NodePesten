@@ -30,6 +30,13 @@ $(document).ready(function () {
             socket.emit('start_game', server);
             sendChatMessage("LETS GET READY TO RUMBLE");
         }
+	});
+    
+    $(".hand").on("click", ".hand-card", function () {        
+        var card = $(this).data('card');
+        var suit = $(this).data('suit');
+        
+        socket.emit('place_card', { server: server, card: card, suit: suit });
 	});  
 });
 
@@ -76,12 +83,20 @@ function joinServer() {
         onReceivedChatMessage(data);
     });
     
-    socket.on('game_has_started', function () {
-        onGameHasStarted();
+    socket.on('game_has_started', function (data) {
+        onGameHasStarted(data);
     });
     
     socket.on('update_player_list', function (data) {
         onPlayerListUpdate(data);
+    });
+    
+    socket.on('update_player_hand', function (data) {
+        onPlayerUpdateHand(data);
+    });
+    
+    socket.on('update_game', function (data) {
+        onGameUpdate(data);
     });
 }
 
@@ -105,9 +120,11 @@ function onReceivedChatMessage(data) {
     $(".chatbox-messages ul").append('<li>' + data + '</li>');
 }
 
-function onGameHasStarted() {
-    alert("started!");
+function onGameHasStarted(object) {
     $(".start-game").remove();
+    $(".remaining").html(object.length + " kaarten");
+    
+    $(".pot").html('<div class="hand-card">' + object.drawnCard[0].card + ', ' + object.drawnCard[0].suit + '</div>')
 }
 
 function onPlayerListUpdate(data) {
@@ -116,4 +133,21 @@ function onPlayerListUpdate(data) {
     $.each(data, function (index, player) {
         $('.player-list ul').append('<li>' + player.name + ' (host: ' + player.host + ')</li>');
     });
+}
+
+function onPlayerUpdateHand(data) {
+    console.log(data);
+    
+    $('.hand').html('');
+    $.each(data, function (index, card) {
+        if(card != null)
+            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + card.card + ', ' + card.suit + '</div>');
+    });
+}
+
+function onGameUpdate(data) {
+    $('.remaining').html(data.stackLength + ' kaarten');
+    
+    $('.pot').html('');
+    $('.pot').html('<div class="hand-card">' + data.currentPotCard.card + ', ' + data.currentPotCard.suit + ' (' + data.potLength + ' kaarten)</div>')
 }

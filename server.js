@@ -8,9 +8,9 @@ var io = require('socket.io').listen(server);
 eval(require('fs').readFileSync('game.js').toString());
 
 var servers = [ 
-    { name: 'Kamer 1', players: {}, state: 'lobby' }, 
-    { name: 'Kamer 2', players: {}, state: 'lobby' }, 
-    { name: 'Kamer 3', players: {}, state: 'lobby' } 
+    { name: 'Kamer 1', cardStack: [], pot: [], players: {}, state: 'lobby' }, 
+    { name: 'Kamer 2', cardStack: [], pot: [], players: {}, state: 'lobby' }, 
+    { name: 'Kamer 3', cardStack: [], pot: [], players: {}, state: 'lobby' } 
 ];
 
 io.on('connection', function (socket) {    
@@ -29,7 +29,8 @@ io.on('connection', function (socket) {
         if(Object.keys(joinedServer.players).length == 0) {
             joinedServer.players[socket.id] = {
                 name: data.player,
-                host: true
+                host: true,
+                hand: {}
             };
             // stuur event terug met of ie host is en een lijst met spelers
             fn(true, joinedServer.state, joinedServer.players);
@@ -37,7 +38,8 @@ io.on('connection', function (socket) {
         else {
             joinedServer.players[socket.id] = {
                 name: data.player,
-                host: false
+                host: false,
+                hand: {}
             };
             // stuur event terug met of ie host is en een lijst met spelers
             fn(false, joinedServer.state, joinedServer.players);
@@ -96,12 +98,47 @@ io.on('connection', function (socket) {
         theServer.state = 'playing';
         
         // initializeer spel logica
-        var cards = create(2);
-        console.log(cards.length);
+        theServer.cardStack = create(2);
+        console.log(theServer.cardStack.length);
+        
+        for(var player in theServer.players) {
+            theServer.players[player].hand = draw(theServer.cardStack, 7);
+            io.to(player).emit('update_player_hand', theServer.players[player].hand);
+        }
+        
+        theServer.pot = draw(theServer.cardStack, 1);
               
-        io.to(server).emit('game_has_started');
+        io.to(server).emit('game_has_started', { length: theServer.cardStack.length, drawnCard: theServer.pot });
         
         console.log('game_has_started: ' + server);
+	});
+    
+    socket.on('place_card', function (data) {
+        var server = getServerByName(data.server);
+        console.log("name: " + server.name);
+        
+        // push pot
+        server.pot.push({ card: data.card, suit: data.suit });
+        
+        // zoek speler
+        for(var player in server.players) {
+            if(player == socket.id) {
+                // zoek kaart
+                for(var card in server.players[player].hand) {
+                    if(server.players[player].hand[card].card == data.card && server.players[player].hand[card].suit == data.suit) {
+                        delete server.players[player].hand[card];
+                        
+                        socket.emit('update_player_hand', server.players[player].hand);
+                        console.log('kaart verwijderd en update_player_hand');
+                    }
+                }              
+                console.log('speler gevonden');
+            }
+        }
+                            
+        io.to(data.server).emit('update_game', { stackLength: server.cardStack.length, potLength: server.pot.length, currentPotCard: server.pot[server.pot.length - 1] });
+        
+        console.log('place_card: ' + data);
 	});
 });
 

@@ -30,3 +30,23 @@
 .start-game {
     visibility: hidden;
 }
+
+.hand {
+    width: 800px;
+    border: 1px solid black;
+}
+
+.hand-card {
+    width: 100px;
+    height: 200px;
+    border: 1px solid red;
+    display: inline-block;
+    vertical-align: bottom;
+    cursor: pointer;
+}
+
+.stack {
+    width: 100px;
+    height: 200px;
+    border: 1px solid red;
+}
