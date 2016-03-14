@@ -5,20 +5,18 @@ var server = app.listen(3000);
 var io = require('socket.io').listen(server);
 
 // johnnys gamejs
-//eval(require('fs').readFileSync('game.js').toString());
+eval(require('fs').readFileSync('public/network-game.js').toString());
 
 var servers = [ 
-    { name: 'Kamer 1', cardStack: [], pot: [], players: {}, state: 'lobby', currentTurnOrder: -1 }, 
-    { name: 'Kamer 2', cardStack: [], pot: [], players: {}, state: 'lobby', currentTurnOrder: -1 }, 
-    { name: 'Kamer 3', cardStack: [], pot: [], players: {}, state: 'lobby', currentTurnOrder: -1 } 
+    { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
+    { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
+    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true } 
 ];
 
 io.on('connection', function (socket) {    
     // dit wordt geroepen wanneer er een request wordt uitgevoerd op serverlist.html
     socket.on('request_servers', function (fn) {
         fn(servers);
-        
-        console.log('request_servers: ' + servers.length);
 	});
     
     // dit wordt geroepen wanneer een speler een kamer joint
@@ -55,8 +53,6 @@ io.on('connection', function (socket) {
         
         // we willen de spelerslijst ook updaten, stuur speler data mee
         io.to(data.server).emit('update_player_list', joinedServer.players);    
-                
-        console.log('join_server: ' + data.server + ', aantal spelers: ' + Object.keys(joinedServer.players).length);
 	});
     
     // dit wordt geroepen wanneer een speler een kamer uitgaat dmv disconnect te drukken
@@ -72,16 +68,12 @@ io.on('connection', function (socket) {
         
         // update bestaande spelers en zeg dat er een nieuwe speler is geleaved
         io.to(server).emit('update_player_list', leftServer.players);    
-        
-        console.log('leave_server: ' + server + ', aantal spelers: ' + Object.keys(leftServer.players).length);
 	});
     
     // dit wordt geroepen wanneer we een chat message event krijgen van de client
     socket.on('send_message', function (data) {
         // stuur data naar de kamer (naar alle clients dus) door de .to methode
         io.to(data.server).emit('message', data.message);
-        
-        console.log('send_message: ' + data.message + " to: " + data.server);
 	});
     
     // dit is ingebakken binnen socket.io en wordt geroepen wanneer iemand de pagina verlaat/ververst
@@ -92,7 +84,6 @@ io.on('connection', function (socket) {
             for(var player in servers[server].players) {
                 // hebben we de speler gevonden?
                 if(player == socket.id) {
-                    console.log("player: " + servers[server].players[player].name + " browser afgesloten/refresh");
                     io.to(server).emit('message', servers[server].players[player].name + ' is de server uitgegaan');
                     
                     // verwijder
@@ -114,8 +105,8 @@ io.on('connection', function (socket) {
         theServer.state = 'playing';
         
         // initializeer spel logica
-        theServer.cardStack = create(2);
-        console.log(theServer.cardStack.length);
+        theServer.pack = create();
+        shuffle(theServer.pack);
         
         var startingPlayer = null;
         var startingSocketId = null;
@@ -130,7 +121,7 @@ io.on('connection', function (socket) {
             }
             
             // geef ieder speler 7 kaarten    
-            theServer.players[player].hand = draw(theServer.cardStack, 7);
+            theServer.players[player].hand = draw(theServer.pack, 7);
             
             // geef ook een turn order aan de speler
             theServer.players[player].turnOrder = turnOrder;
@@ -140,21 +131,29 @@ io.on('connection', function (socket) {
             turnOrder++;
         }
         
-        // pot begint met 1 kaart
-        theServer.pot = draw(theServer.cardStack, 1);
+        // stack begint met 1 kaart
+        start(theServer.pack, theServer.stack);
               
         // stuur data naar alle clients binnen die kamer
-        io.to(server).emit('game_has_started', { length: theServer.cardStack.length, drawnCard: theServer.pot, startingPlayer: {name: startingPlayer.name, id: startingSocketId} });
-        
-        console.log('game_has_started: ' + server);
+        io.to(server).emit('game_has_started', { length: theServer.pack.length, drawnCard: theServer.stack, startingPlayer: {name: startingPlayer.name, id: startingSocketId} });
 	});
     
-    socket.on('place_card', function (data) {
-        var server = getServerByName(data.server);
-        console.log("name: " + server.name);
+    socket.on('request_new_card', function (server) {
+        var server = getServerByName(server);
         
-        // pot krijgt een kaartje er bij (van de speler)
-        server.pot.push({ card: data.card, suit: data.suit });
+        for(var player in server.players) {
+            if(player == socket.id) {
+                server.players[player].hand.push(draw(server.pack, 1)[0]);
+                socket.emit('update_player_hand', server.players[player].hand);
+                next(server);
+            }
+        } 
+    });
+    
+    socket.on('place_card', function (data, fn) {
+        var server = getServerByName(data.server);
+        
+        var nextPlayer = null;
         
         // zoek speler
         for(var player in server.players) {
@@ -163,43 +162,66 @@ io.on('connection', function (socket) {
                 for(var card in server.players[player].hand) {
                     // hebben we de juiste kaart gevonden?
                     if(server.players[player].hand[card].card == data.card && server.players[player].hand[card].suit == data.suit) {
-                        // verwijder van speler
-                        delete server.players[player].hand[card];
-                        
-                        // update speler hand
-                        socket.emit('update_player_hand', server.players[player].hand);
-                        console.log('kaart verwijderd en update_player_hand');
+                        if (possible(server.stack, server.players[player].hand[card])) {
+                            
+                            // stack krijgt een kaartje er bij (van de speler)
+                            server.stack.push({ card: data.card, suit: data.suit });
+                            
+                            switch (true) {		
+                                case (server.players[player].hand[card].card == 0):// Joker pak 5
+                                    take(server, 5, true);
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 1):// Aas is keer
+                                    rotate(server);
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 2):// 2 pak 2
+                                    take(server, 2);
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 7):// Zeven kleeft
+                                    //stick(); wtf?
+                                    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 8):// Acht wacht
+                                    skip(server);
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 11):// Boer veranderd
+                                    //change(prompt("Choose a new suit (H, K, S, R):", card.suit));
+                                    socket.emit('prompt_suit_change', function (promptData) {
+                                        change(server.stack, promptData);
+                                        next(server);
+                                    });                                    
+                                    break;
+                                    
+                                case (server.players[player].hand[card].card == 13):// Koning
+                                    //stick();??
+                                    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+                                    break;
+                                    
+                                default:
+                                    next(server);
+                                    break;
+                            }
+                            
+                            // verwijder van speler
+                            delete server.players[player].hand[card];
+                            
+                            // update speler hand
+                            fn(true);
+                            socket.emit('update_player_hand', server.players[player].hand);
+                        }
+                        else {
+                            fn(false);
+                            io.to(data.server).emit('message', 'das ist nicht mogelijk gozert');
+                        }
                     }
                 }              
-                console.log('speler gevonden');
             }
         }
-        
-        // we gaan nu even van uit dat niemand de server uit is :P
-        // dit levert problemen met: als iemand uit de server gaat, als we van volgorde verwisselen
-        if(server.currentTurnOrder + 1 <= Object.keys(server.players).length - 1) {
-            server.currentTurnOrder++;
-            console.log("turn boven mij");
-        }
-        else {
-            server.currentTurnOrder = 0;
-            console.log("geen turn boven mij gevodnen");
-        }
-        
-        var currentPlayer = null;
-        // zoek speler
-        for(var player in server.players) {
-            // jij bent aan de beurt!
-            if(server.players[player].turnOrder == server.currentTurnOrder) {
-                currentPlayer = {id: player, name: server.players[player].name};
-            }
-        }
-        
-        // update game status aan alle clients binnen de kamer, stuur ook gelijk een chat message zeggend wie aan de beurt is                    
-        io.to(data.server).emit('update_game', { stackLength: server.cardStack.length, potLength: server.pot.length, currentPotCard: server.pot[server.pot.length - 1], currentPlayer: currentPlayer });
-        io.to(data.server).emit('message', 'de beurt is aan: ' + currentPlayer.name);
-        
-        console.log('place_card: ' + data);
 	});
 });
 
@@ -213,4 +235,167 @@ function getServerByName(name) {
     });
     
     return found;  
+}
+
+function skip(server) {
+    next(server);
+    next(server);
+}
+
+// Kaarten pakken
+function take(server, amount, joker) {
+	server.takeAmount = server.takeAmount + amount;
+	next(server);
+    
+    var nextPlayer = null;
+    var socketId = null;
+    
+    if(server.rotation) {
+        var found = false;
+        for(var player in server.players) {
+            if(server.currentTurnOrder < server.players[player].currentTurnOrder) {
+                nextPlayer = server.players[player];
+                socketId = player;
+                break;
+            }
+        }
+        
+        if(!found) {
+            for(var from = 0; from < 100; from++) {
+                for(var player in server.players) {
+                    if(from == server.players[player].currentTurnOrder && !found) {
+                        nextPlayer = server.players[player];
+                        found = true;
+                        socketId = player;
+                        break;
+                    }
+                } 
+            }
+        }
+    }
+    else {
+        var found = false;
+        for(var from = server.currentTurnOrder; from > 0; from--) {
+            for(var player in server.players) {
+                if(from == server.players[player].currentTurnOrder && !found) {
+                    nextPlayer = server.players[player];
+                    found = true;
+                    socketId = player;
+                    break;
+                }
+            }
+        }
+        
+        if(!found) {
+            // zoek hoogste turn order
+            var start = 0;
+            for(var player in server.players) {
+                if(start < server.players[player].currentTurnOrder) {
+                    nextPlayer = server.players[player];
+                    socketId = player;
+                    break;
+                }
+            }
+        }
+    }
+    
+	var hasCard = true;
+    for(var card in nextPlayer.hand) {
+        if (!possible(server.stack, card))
+			hasCard = false;
+    }
+	
+	if (!hasCard) {
+        nextPlayer.hand.push(draw(server.pack, server.takeAmount))
+        
+        // update speler hand
+        socket.emit('update_player_hand', nextPlayer.hand);
+        //change(prompt("Choose a new suit (H, K, S, R):"));
+		if (joker) {
+            io.to(socketId).emit('prompt_suit_change', function (promptData) {
+                change(server.stack, promptData);
+                next(server);
+            });
+        }
+            
+		server.takeAmount = 0;
+		next(server);
+	}
+}
+
+// Verander draairichting
+// todo
+function rotate(server) {
+	if (server.rotation)
+		server.rotation = false;
+	else
+		server.rotation = true;
+    
+	next(server);
+}
+
+function next(server) {
+    if(server.rotation) {
+        var found = false;
+        for(var player in server.players) {
+            if(server.currentTurnOrder < server.players[player].turnOrder) {
+                server.currentTurnOrder = server.players[player].turnOrder;
+                found = true;
+                break;
+            }
+        }
+        
+        if(!found) {
+            server.currentTurnOrder = 0; // dit gaat fout
+            for(var from = 0; from < 100; from++) {
+                for(var player in server.players) {
+                    if(from == server.players[player].turnOrder && !found) {
+                        server.currentTurnOrder = server.players[player].turnOrder;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else {
+        var found = false;
+        for(var from = server.currentTurnOrder; from > 0; from--) {
+            for(var player in server.players) {
+                if(from == server.players[player].turnOrder) {
+                    server.currentTurnOrder = server.players[player].turnOrder;
+                    found = true;
+                    break;
+                }
+            }
+        }
+        
+        if(!found) {
+            // zoek hoogste turn order
+            var start = 0;
+            for(var player in server.players) {
+                if(start < server.players[player].turnOrder) {
+                    start = server.players[player].turnOrder;
+                    break;
+                }
+            }
+            
+            server.currentTurnOrder = start;
+        }
+    }
+    
+    var nextPlayer = {};
+    // zoek speler
+    for(var player in server.players) {
+        // jij bent aan de beurt!
+        if(server.players[player].turnOrder == server.currentTurnOrder) {
+            nextPlayer = {id: player, name: server.players[player].name};
+        }
+    }
+    
+    // update game status aan alle clients binnen de kamer, stuur ook gelijk een chat message zeggend wie aan de beurt is                    
+    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: nextPlayer });
+    io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
+    
+    return nextPlayer;
 }

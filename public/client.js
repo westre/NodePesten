@@ -43,13 +43,28 @@ $(document).ready(function () {
         
         if(myTurn) {
             // stuur commando naar server
-            socket.emit('place_card', { server: server, card: card, suit: suit });
-            myTurn = false;
+            socket.emit('place_card', { server: server, card: card, suit: suit }, function (isValid) {
+                if(!isValid)
+                    myTurn = true;
+                    
+                console.log('called');
+            });
         }
         else {
             alert("het is niet jouw beurt vriend");
         }
-	});  
+	});
+    
+    $(document).on("click", ".remaining", function () {        
+        if(myTurn) {
+            // stuur commando naar server
+            socket.emit('request_new_card', server);
+            alert("jap");
+        }
+        else {
+            alert("het is niet jouw beurt vriend");
+        }
+	});    
 });
 
 // wordt geroepen wanneer we in serverlist.html zitten
@@ -110,6 +125,10 @@ function joinServer() {
     socket.on('update_game', function (data) {
         onGameUpdate(data);
     });
+    
+    socket.on('prompt_suit_change', function (fn) {
+        fn(prompt("je suit graag"));
+    });
 }
 
 // wordt geroepen wanneer we op disconnect button klikken
@@ -136,7 +155,7 @@ function onGameHasStarted(object) {
     $(".start-game").remove();
     $(".remaining").html(object.length + " kaarten");
     
-    $(".pot").html('<div class="hand-card">' + object.drawnCard[0].card + ', ' + object.drawnCard[0].suit + '</div>');
+    $(".pot").html('<div class="hand-card">' + fancy(object.drawnCard[0], true) + '</div>');
     
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
@@ -161,15 +180,15 @@ function onPlayerUpdateHand(data) {
     $('.hand').html('');
     $.each(data, function (index, card) {
         if(card != null)
-            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + card.card + ', ' + card.suit + '</div>');
+            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + fancy(card, true) + '</div>');
     });
 }
 
 function onGameUpdate(data) {
-    $('.remaining').html(data.stackLength + ' kaarten');
+    $('.remaining').html(data.packLength + ' kaarten');
     
     $('.pot').html('');
-    $('.pot').html('<div class="hand-card">' + data.currentPotCard.card + ', ' + data.currentPotCard.suit + ' (' + data.potLength + ' kaarten)</div>');
+    $('.pot').html('<div class="hand-card">' + fancy(data.currentStackCard, true) + ' (' + data.stackLength + ' kaarten)</div>');
     
     console.log(data);
     
@@ -179,5 +198,10 @@ function onGameUpdate(data) {
     if(data.currentPlayer.id == fixedSocketId) {
         myTurn = true;
         alert("Jij bent!");
+        console.log('ja echt');
     }
+}
+
+function onPromptSuitChange(fn) {
+    fn(prompt("je suit graag"));
 }
