@@ -2,11 +2,12 @@ var socket = null;
 var host = false;
 var server = null;
 var player = null;
+var myTurn = false;
 
 $(document).ready(function () {
     $('input[name="player-name"]').val(localStorage.getItem("player"));
     
-    // dynamische binding
+    // dynamische binding, wanneer we een server will joinen
     $(document).on("click", ".join-server", function () {        
         localStorage.setItem("player", $('input[name="player-name"]').val());
         localStorage.setItem("server", $(this).data('name'));
@@ -14,10 +15,12 @@ $(document).ready(function () {
         window.location.href = "game.html";
 	});
     
+    // disconnect knopje
     $(".leave-server").click(function () {
 		leaveServer();
 	});
     
+    // chatbox voor communicatie tussen de clients
     $('.chatbox-input').keypress(function (e) {
         var key = e.which;
         if(key == 13) { // the enter key code
@@ -25,10 +28,26 @@ $(document).ready(function () {
         }
     });
     
+    // voor de host om het spel te starten
     $(".start-game").click(function () {
 		if(host) {
             socket.emit('start_game', server);
             sendChatMessage("LETS GET READY TO RUMBLE");
+        }
+	});
+    
+    // voor de spelers zodat ze op hun kaart kunnen klikken en het ook verwerkt wordt
+    $(".hand").on("click", ".hand-card", function () {        
+        var card = $(this).data('card');
+        var suit = $(this).data('suit');
+        
+        if(myTurn) {
+            // stuur commando naar server
+            socket.emit('place_card', { server: server, card: card, suit: suit });
+            myTurn = false;
+        }
+        else {
+            alert("het is niet jouw beurt vriend");
         }
 	});  
 });
@@ -76,12 +95,20 @@ function joinServer() {
         onReceivedChatMessage(data);
     });
     
-    socket.on('game_has_started', function () {
-        onGameHasStarted();
+    socket.on('game_has_started', function (data) {
+        onGameHasStarted(data);
     });
     
     socket.on('update_player_list', function (data) {
         onPlayerListUpdate(data);
+    });
+    
+    socket.on('update_player_hand', function (data) {
+        onPlayerUpdateHand(data);
+    });
+    
+    socket.on('update_game', function (data) {
+        onGameUpdate(data);
     });
 }
 
@@ -105,9 +132,19 @@ function onReceivedChatMessage(data) {
     $(".chatbox-messages ul").append('<li>' + data + '</li>');
 }
 
-function onGameHasStarted() {
-    alert("started!");
+function onGameHasStarted(object) {
     $(".start-game").remove();
+    $(".remaining").html(object.length + " kaarten");
+    
+    $(".pot").html('<div class="hand-card">' + object.drawnCard[0].card + ', ' + object.drawnCard[0].suit + '</div>');
+    
+    // vraag mij niet waarom...
+    var fixedSocketId = "/#" + socket.id;
+    
+    if(object.startingPlayer.id == fixedSocketId) {
+        myTurn = true;
+        alert("Jij bent!");
+    }
 }
 
 function onPlayerListUpdate(data) {
@@ -116,4 +153,31 @@ function onPlayerListUpdate(data) {
     $.each(data, function (index, player) {
         $('.player-list ul').append('<li>' + player.name + ' (host: ' + player.host + ')</li>');
     });
+}
+
+function onPlayerUpdateHand(data) {
+    console.log(data);
+    
+    $('.hand').html('');
+    $.each(data, function (index, card) {
+        if(card != null)
+            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + card.card + ', ' + card.suit + '</div>');
+    });
+}
+
+function onGameUpdate(data) {
+    $('.remaining').html(data.stackLength + ' kaarten');
+    
+    $('.pot').html('');
+    $('.pot').html('<div class="hand-card">' + data.currentPotCard.card + ', ' + data.currentPotCard.suit + ' (' + data.potLength + ' kaarten)</div>');
+    
+    console.log(data);
+    
+    // vraag mij niet waarom...
+    var fixedSocketId = "/#" + socket.id;
+    
+    if(data.currentPlayer.id == fixedSocketId) {
+        myTurn = true;
+        alert("Jij bent!");
+    }
 }
