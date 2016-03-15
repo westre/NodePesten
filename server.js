@@ -324,7 +324,6 @@ function take(server, amount, joker) {
 }
 
 // Verander draairichting
-// todo
 function rotate(server) {
 	if (server.rotation)
 		server.rotation = false;
@@ -332,6 +331,8 @@ function rotate(server) {
 		server.rotation = true;
     
 	next(server);
+    
+    console.log("rotate");
 }
 
 function next(server) {
@@ -340,6 +341,7 @@ function next(server) {
         for(var player in server.players) {
             if(server.currentTurnOrder < server.players[player].turnOrder) {
                 server.currentTurnOrder = server.players[player].turnOrder;
+                console.log("Rotation = true");
                 found = true;
                 break;
             }
@@ -352,6 +354,7 @@ function next(server) {
                     if(from == server.players[player].turnOrder && !found) {
                         server.currentTurnOrder = server.players[player].turnOrder;
                         found = true;
+                        console.log("Rotation = true");
                         break;
                     }
                 }
@@ -365,6 +368,7 @@ function next(server) {
                 if(from == server.players[player].turnOrder) {
                     server.currentTurnOrder = server.players[player].turnOrder;
                     found = true;
+                    console.log("Rotation = false");
                     break;
                 }
             }
@@ -376,6 +380,7 @@ function next(server) {
             for(var player in server.players) {
                 if(start < server.players[player].turnOrder) {
                     start = server.players[player].turnOrder;
+                    console.log("Rotation = false");
                     break;
                 }
             }
