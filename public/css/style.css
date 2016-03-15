@@ -54,3 +54,7 @@
 .remaining {
     cursor: pointer;
 }
+
+#tableImg{
+    width:50%;
+}
