@@ -8,9 +8,9 @@ var io = require('socket.io').listen(server);
 eval(require('fs').readFileSync('public/network-game.js').toString());
 
 var servers = [ 
-    { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
-    { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
-    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true } 
+    { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
+    { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
+    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true } 
 ];
 
 io.on('connection', function (socket) {    
@@ -252,10 +252,13 @@ function take(server, amount, joker) {
     var nextPlayer = null;
     var socketId = null;
     
+    console.log("take server: " + server);
     if(server.rotation) {
         var found = false;
+        console.log("inside 1");
         for(var player in server.players) {
-            if(server.currentTurnOrder < server.players[player].currentTurnOrder) {
+            console.log(server.currentTurnOrder + "<" + server.players[player].turnOrder)
+            if(server.currentTurnOrder < server.players[player].turnOrder) {
                 nextPlayer = server.players[player];
                 socketId = player;
                 console.log(server.players[player].name + " take");
@@ -264,9 +267,11 @@ function take(server, amount, joker) {
         }
         
         if(!found) {
+            console.log("inside 2");
             for(var from = 0; from < 100; from++) {
                 for(var player in server.players) {
-                    if(from == server.players[player].currentTurnOrder && !found) {
+                    console.log(from + "==" + server.players[player].turnOrder)
+                    if(from == server.players[player].turnOrder && !found) {
                         nextPlayer = server.players[player];
                         found = true;
                         socketId = player;
@@ -278,10 +283,11 @@ function take(server, amount, joker) {
         }
     }
     else {
+        console.log("inside 3");
         var found = false;
         for(var from = server.currentTurnOrder; from > 0; from--) {
             for(var player in server.players) {
-                if(from == server.players[player].currentTurnOrder && !found) {
+                if(from == server.players[player].turnOrder && !found) {
                     nextPlayer = server.players[player];
                     found = true;
                     socketId = player;
@@ -292,10 +298,11 @@ function take(server, amount, joker) {
         }
         
         if(!found) {
+            console.log("inside 4");
             // zoek hoogste turn order
             var start = 0;
             for(var player in server.players) {
-                if(start < server.players[player].currentTurnOrder) {
+                if(start < server.players[player].turnOrder) {
                     nextPlayer = server.players[player];
                     socketId = player;
                     console.log(server.players[player].name + " take");
@@ -312,21 +319,34 @@ function take(server, amount, joker) {
     }
 	
 	if (!hasCard) {
-        nextPlayer.hand.push(draw(server.pack, server.takeAmount))
+        console.log('has no card, take amount; ' + server.takeAmount);
+        var drawnCards = draw(server.pack, server.takeAmount);
+        
+        for(var card in drawnCards) {
+            nextPlayer.hand.push(drawnCards[card]);
+        }
         
         // update speler hand
-        socket.emit('update_player_hand', nextPlayer.hand);
+        io.to(socketId).emit('update_player_hand', nextPlayer.hand);
+            
         //change(prompt("Choose a new suit (H, K, S, R):"));
 		if (joker) {
-            io.to(socketId).emit('prompt_suit_change', function (promptData) {
+            var sckt = io.sockets.connected[socketId];
+            
+            sckt.emit('prompt_suit_change', function (promptData) {
                 change(server.stack, promptData);
                 next(server);
+                console.log('promptsuitchange: ' + promptData);
             });
         }
-            
-		server.takeAmount = 0;
-		next(server);
+        else {
+            server.takeAmount = 0;
+            next(server);
+        }
 	}
+    else {
+        console.log('has card, ignoring')
+    }
 }
 
 // Verander draairichting
