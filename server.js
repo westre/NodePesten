@@ -8,9 +8,9 @@ var io = require('socket.io').listen(server);
 eval(require('fs').readFileSync('public/network-game.js').toString());
 
 var servers = [ 
-    { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
-    { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true }, 
-    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: -1, rotation: true } 
+    { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
+    { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
+    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true } 
 ];
 
 io.on('connection', function (socket) {    
