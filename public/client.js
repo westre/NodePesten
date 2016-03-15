@@ -158,7 +158,7 @@ function onGameHasStarted(object) {
     $(".start-game").remove();
     $(".remaining").html(object.length + " kaarten");
     
-    $(".pot").html('<div class="hand-card">' + fancy(object.drawnCard[0], true) + '</div>');
+    $(".pot").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '">' + fancy(object.drawnCard[0], true) + '</div>');
     
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
@@ -193,7 +193,7 @@ function onGameUpdate(data) {
     $('.remaining').html(data.packLength + ' kaarten');
     
     $('.pot').html('');
-    $('.pot').html('<div class="hand-card">' + fancy(data.currentStackCard, true) + ' (' + data.stackLength + ' kaarten)</div>');
+    $('.pot').html('<div class="hand-card" data-card="' + data.currentStackCard.card + '" data-suit="' + data.currentStackCard.suit + '">' + fancy(data.currentStackCard, true) + ' (' + data.stackLength + ' kaarten)</div>');
     
     console.log(data);
     
