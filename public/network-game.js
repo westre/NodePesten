@@ -203,12 +203,3 @@ function knockknock(player) {
 }
 
 
-
-
-
-
-// Kleven
-function stick() {
-	//alert("Nog een keer");
-}
-
