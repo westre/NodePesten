@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Lato);
+
 .test {
 	width: 100px;
 	height: 100px;
@@ -7,7 +9,7 @@
 .chatbox {
     width: 300px;
     height: 300px;
-    border: 1px solid black;
+    border: 2px solid #810000;
     margin-bottom: 25px;
 }
 
@@ -22,9 +24,9 @@
 }
 
 .player-list {
-    width: 200px;
+    width: 300px;
     height: 200px;
-    border: 1px solid black;
+    border: 2px solid #810000;
 }
 
 .start-game {
@@ -55,6 +57,54 @@
     cursor: pointer;
 }
 
-#tableImg{
-    width:50%;
+#playingCardsImg{
+    text-align: center;
+    width:100%;
+    height: 100%;
+}
+
+body{
+    background-color: #AE2411;
+    width: 100%;
+    height: 100%;
+    font-family: 'Lato', sans-serif;
+    /*overflow-y: hidden;
+    overflow-x: hidden;*/
+    color: #64ffa6;
+}
+
+h1{
+    color: #00AE5A;
+    text-align: center;
+    font-size: 90px;
+}
+
+h2{
+    color: #00994F;
+    text-align: center;
+    font-size: 40px;
+}
+
+a{
+    color: #00994F;
+    color:lavenderblush;
+    text-decoration:none;
+}
+
+a:hover{
+    color: #FFFFFF;
+    transition: all 200ms ease-in;
+}
+
+h2:hover{
+    color: #FFFFFF;
+    transition: all 200ms ease-in;
+}
+
+#table{
+    position: absolute;
+    left: 0;
+    top: 30%;
+    width: 100%;
+    text-align: center;
 }
