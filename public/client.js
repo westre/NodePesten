@@ -153,7 +153,7 @@ function onReceivedChatMessage(data) {
 }
 
 function onGameHasStarted(object) {
-    backgroundDynamic();
+    
     $(".start-game").remove();
     $(".remaining").html(object.length + " kaarten");
     
@@ -166,19 +166,21 @@ function onGameHasStarted(object) {
         myTurn = true;
         alert("Jij bent!");
     }
+    backgroundDynamic();
 }
 
 function onPlayerListUpdate(data) {
-    backgroundDynamic();
+   
     $('.player-list ul').html('');
     
     $.each(data, function (index, player) {
         $('.player-list ul').append('<li>' + player.name + ' (host: ' + player.host + ')</li>');
     });
+    backgroundDynamic();
 }
 
 function onPlayerUpdateHand(data) {
-    backgroundDynamic();
+    
     console.log(data);
     
     $('.hand').html('');
@@ -186,10 +188,11 @@ function onPlayerUpdateHand(data) {
         if(card != null)
             $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + fancy(card, true) + '</div>');
     });
+    backgroundDynamic();
 }
 
 function onGameUpdate(data) {
-    backgroundDynamic();
+    
     $('.remaining').html(data.packLength + ' kaarten');
     
     $('.pot').html('');
@@ -205,7 +208,7 @@ function onGameUpdate(data) {
         alert("Jij bent!");
         console.log('ja echt');
     }
-
+    backgroundDynamic();
    
 }
 
