@@ -143,17 +143,41 @@ io.on('connection', function (socket) {
         
         for(var player in server.players) {
             if(player == socket.id) {
-                server.players[player].hand.push(draw(server.pack, 1)[0]);
-                socket.emit('update_player_hand', server.players[player].hand);
-                next(server);
+                // jokertje, 2tje
+                if(server.takeAmount > 0) {
+                    socket.emit('message', server.players[player].name + ' heeft geen kaarten, moet kaarten pakken: ' + server.takeAmount);
+        
+                    var drawnCards = draw(server.pack, server.takeAmount);
+                    
+                    for(var card in drawnCards) {
+                        server.players[player].hand.push(drawnCards[card]);
+                    }
+                    
+                    // update speler hand
+                    socket.emit('update_player_hand', server.players[player].hand);
+                    
+                    server.takeAmount = 0;
+                    
+                    var topCard = server.stack[server.stack.length - 1];
+                    if(topCard.card == 0) {
+                        socket.emit('prompt_suit_change', function (promptData) {
+                            change(server.stack, promptData);
+                            next(server);
+                            console.log('promptsuitchange: ' + promptData);
+                        });
+                    }
+                }
+                else {
+                    server.players[player].hand.push(draw(server.pack, 1)[0]);
+                    socket.emit('update_player_hand', server.players[player].hand);
+                    next(server);  
+                }
             }
         } 
     });
     
     socket.on('place_card', function (data, fn) {
         var server = getServerByName(data.server);
-        
-        var nextPlayer = null;
         
         // zoek speler
         for(var player in server.players) {
@@ -162,43 +186,39 @@ io.on('connection', function (socket) {
                 for(var card in server.players[player].hand) {
                     // hebben we de juiste kaart gevonden?
                     if(server.players[player].hand[card].card == data.card && server.players[player].hand[card].suit == data.suit) {
-                        if (possible(server.stack, server.players[player].hand[card])) {
-                            
+                        if (possible(server.stack, server.players[player].hand[card])) {                           
                             // stack krijgt een kaartje er bij (van de speler)
                             server.stack.push({ card: data.card, suit: data.suit });
                             
                             switch (true) {		
-                                case (server.players[player].hand[card].card == 0):// Joker pak 5
+                                case (server.players[player].hand[card].card == 0): // Joker pak 5
                                     take(server, 5, true);
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 1):// Aas is keer
+                                case (server.players[player].hand[card].card == 1): // Aas is keer
                                     rotate(server);
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 2):// 2 pak 2
+                                case (server.players[player].hand[card].card == 2): // 2 pak 2
                                     take(server, 2);
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 7):// Zeven kleeft
-                                    //stick(); wtf?
+                                case (server.players[player].hand[card].card == 7): // Zeven kleeft
                                     io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 8):// Acht wacht
+                                case (server.players[player].hand[card].card == 8): // Acht wacht
                                     skip(server);
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 11):// Boer veranderd
-                                    //change(prompt("Choose a new suit (H, K, S, R):", card.suit));
+                                case (server.players[player].hand[card].card == 11): // Boer veranderd
                                     socket.emit('prompt_suit_change', function (promptData) {
                                         change(server.stack, promptData);
                                         next(server);
                                     });                                    
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 13):// Koning
-                                    //stick();??
+                                case (server.players[player].hand[card].card == 13): // Koning
                                     io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
                                     break;
                                     
@@ -225,6 +245,17 @@ io.on('connection', function (socket) {
             }
         }
 	});
+    
+    socket.on('is_it_my_turn', function (server, fn) {
+        var server = getServerByName(server);
+        
+        var myTurn = false;       
+        if(server.players[socket.id].turnOrder == server.currentTurnOrder) {
+            myTurn = true;
+        }
+        
+        fn(myTurn);
+    });
 });
 
 function getServerByName(name) {
@@ -248,105 +279,6 @@ function skip(server) {
 function take(server, amount, joker) {
 	server.takeAmount = server.takeAmount + amount;
 	next(server);
-    
-    var nextPlayer = null;
-    var socketId = null;
-    
-    console.log("take server: " + server);
-    if(server.rotation) {
-        var found = false;
-        console.log("inside 1");
-        for(var player in server.players) {
-            console.log(server.currentTurnOrder + "<" + server.players[player].turnOrder)
-            if(server.currentTurnOrder < server.players[player].turnOrder) {
-                nextPlayer = server.players[player];
-                socketId = player;
-                console.log(server.players[player].name + " take");
-                break;
-            }
-        }
-        
-        if(!found) {
-            console.log("inside 2");
-            for(var from = 0; from < 100; from++) {
-                for(var player in server.players) {
-                    console.log(from + "==" + server.players[player].turnOrder)
-                    if(from == server.players[player].turnOrder && !found) {
-                        nextPlayer = server.players[player];
-                        found = true;
-                        socketId = player;
-                        console.log(server.players[player].name + " take");
-                        break;
-                    }
-                } 
-            }
-        }
-    }
-    else {
-        console.log("inside 3");
-        var found = false;
-        for(var from = server.currentTurnOrder; from > 0; from--) {
-            for(var player in server.players) {
-                if(from == server.players[player].turnOrder && !found) {
-                    nextPlayer = server.players[player];
-                    found = true;
-                    socketId = player;
-                    console.log(server.players[player].name + " take");
-                    break;
-                }
-            }
-        }
-        
-        if(!found) {
-            console.log("inside 4");
-            // zoek hoogste turn order
-            var start = 0;
-            for(var player in server.players) {
-                if(start < server.players[player].turnOrder) {
-                    nextPlayer = server.players[player];
-                    socketId = player;
-                    console.log(server.players[player].name + " take");
-                    break;
-                }
-            }
-        }
-    }
-    
-	var hasCard = true;
-    for(var card in nextPlayer.hand) {
-        if (!possible(server.stack, card))
-			hasCard = false;
-    }
-	
-	if (!hasCard) {
-        console.log('has no card, take amount; ' + server.takeAmount);
-        var drawnCards = draw(server.pack, server.takeAmount);
-        
-        for(var card in drawnCards) {
-            nextPlayer.hand.push(drawnCards[card]);
-        }
-        
-        // update speler hand
-        io.to(socketId).emit('update_player_hand', nextPlayer.hand);
-            
-        //change(prompt("Choose a new suit (H, K, S, R):"));
-		if (joker) {
-            var sckt = io.sockets.connected[socketId];
-            
-            sckt.emit('prompt_suit_change', function (promptData) {
-                change(server.stack, promptData);
-                next(server);
-                console.log('promptsuitchange: ' + promptData);
-            });
-        }
-        else {
-            server.takeAmount = 0;
-            next(server);
-        }
-	}
-    else {
-        console.log('has card, ignoring')
-    }
 }
 
 // Verander draairichting
@@ -420,7 +352,8 @@ function next(server) {
     for(var player in server.players) {
         // jij bent aan de beurt!
         if(server.players[player].turnOrder == server.currentTurnOrder) {
-            nextPlayer = {id: player, name: server.players[player].name};
+            nextPlayer = { id: player, name: server.players[player].name };
+            console.log(server.players[player].name + " is aan de beurt");
         }
     }
     

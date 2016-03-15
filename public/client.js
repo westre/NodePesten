@@ -2,7 +2,6 @@ var socket = null;
 var host = false;
 var server = null;
 var player = null;
-var myTurn = false;
 
 $(document).ready(function () {
     $('input[name="player-name"]').val(localStorage.getItem("player"));
@@ -41,30 +40,33 @@ $(document).ready(function () {
         var card = $(this).data('card');
         var suit = $(this).data('suit');
         
-        if(myTurn) {
-            // stuur commando naar server
-            myTurn = false;
-            socket.emit('place_card', { server: server, card: card, suit: suit }, function (isValid) {
-                if(!isValid)
-                    myTurn = true;
-                    
-                console.log('called');
-            });
-        }
-        else {
-            alert("het is niet jouw beurt vriend");
-        }
+        socket.emit('is_it_my_turn', server, function (myTurn) {
+            if(myTurn) {
+                socket.emit('place_card', { server: server, card: card, suit: suit }, function (isValid) {
+                    /*if(isValid) {
+                        alert("Valide zet");
+                    }
+                    else {
+                        alert("Invalide zet");
+                    }*/       
+                });
+            }
+            else {
+                alert("het is niet jouw beurt vriend");
+            }       
+        });
 	});
     
-    $(document).on("click", ".remaining", function () {        
-        if(myTurn) {
-            // stuur commando naar server
-            socket.emit('request_new_card', server);
-            myTurn = false;
-        }
-        else {
-            alert("het is niet jouw beurt vriend");
-        }
+    $(document).on("click", ".remaining", function () {
+        socket.emit('is_it_my_turn', server, function (myTurn) {
+            if(myTurn) {
+                //alert("Valide zet");
+                socket.emit('request_new_card', server);
+            }
+            else {
+                alert("het is niet jouw beurt vriend");
+            }
+        });               
 	});    
 });
 
@@ -152,8 +154,7 @@ function onReceivedChatMessage(data) {
     $(".chatbox-messages ul").append('<li>' + data + '</li>');
 }
 
-function onGameHasStarted(object) {
-    
+function onGameHasStarted(object) {   
     $(".start-game").remove();
     $(".remaining").html(object.length + " kaarten");
     
@@ -163,24 +164,21 @@ function onGameHasStarted(object) {
     var fixedSocketId = "/#" + socket.id;
     
     if(object.startingPlayer.id == fixedSocketId) {
-        myTurn = true;
         alert("Jij bent!");
     }
+    
     backgroundDynamic();
 }
 
-function onPlayerListUpdate(data) {
-   
+function onPlayerListUpdate(data) {   
     $('.player-list ul').html('');
     
     $.each(data, function (index, player) {
         $('.player-list ul').append('<li>' + player.name + ' (host: ' + player.host + ')</li>');
     });
-    backgroundDynamic();
 }
 
-function onPlayerUpdateHand(data) {
-    
+function onPlayerUpdateHand(data) {   
     console.log(data);
     
     $('.hand').html('');
@@ -191,8 +189,7 @@ function onPlayerUpdateHand(data) {
     backgroundDynamic();
 }
 
-function onGameUpdate(data) {
-    
+function onGameUpdate(data) {  
     $('.remaining').html(data.packLength + ' kaarten');
     
     $('.pot').html('');
@@ -204,12 +201,11 @@ function onGameUpdate(data) {
     var fixedSocketId = "/#" + socket.id;
     
     if(data.currentPlayer.id == fixedSocketId) {
-        myTurn = true;
         alert("Jij bent!");
         console.log('ja echt');
     }
-    backgroundDynamic();
-   
+    
+    backgroundDynamic();  
 }
 
 function onPromptSuitChange(fn) {
