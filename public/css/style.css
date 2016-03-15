@@ -39,18 +39,27 @@
 }
 
 .hand-card {
-    width: 100px;
+    width: 140px;
     height: 200px;
-    border: 1px solid red;
+    
     display: inline-block;
     vertical-align: bottom;
     cursor: pointer;
+    /*background-image:url(http://localhost:3000/images/cards/9_of_clubs.png);
+    background-size: 140px 200px;
+    background-repeat:no-repeat;*/
+    
 }
 
 .stack {
+    position: absolute;
+    left: 50%;
+    top: 40%;
     width: 100px;
+    text-align: center;
+    z-index: 10;
     height: 200px;
-    border: 1px solid red;
+   
 }
 
 .remaining {
@@ -108,3 +117,4 @@ h2:hover{
     width: 100%;
     text-align: center;
 }
+

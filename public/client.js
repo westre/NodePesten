@@ -153,6 +153,7 @@ function onReceivedChatMessage(data) {
 }
 
 function onGameHasStarted(object) {
+    backgroundDynamic();
     $(".start-game").remove();
     $(".remaining").html(object.length + " kaarten");
     
@@ -168,6 +169,7 @@ function onGameHasStarted(object) {
 }
 
 function onPlayerListUpdate(data) {
+    backgroundDynamic();
     $('.player-list ul').html('');
     
     $.each(data, function (index, player) {
@@ -176,6 +178,7 @@ function onPlayerListUpdate(data) {
 }
 
 function onPlayerUpdateHand(data) {
+    backgroundDynamic();
     console.log(data);
     
     $('.hand').html('');
@@ -186,6 +189,7 @@ function onPlayerUpdateHand(data) {
 }
 
 function onGameUpdate(data) {
+    backgroundDynamic();
     $('.remaining').html(data.packLength + ' kaarten');
     
     $('.pot').html('');
@@ -201,8 +205,21 @@ function onGameUpdate(data) {
         alert("Jij bent!");
         console.log('ja echt');
     }
+
+   
 }
 
 function onPromptSuitChange(fn) {
     fn(prompt("je suit graag"));
+}
+
+function backgroundDynamic(){
+    $('.hand-card').each(function () {
+        var type = $(this).attr('data-card');
+        var brand = $(this).attr('data-suit');
+        
+        $(this).css('background-image', 'url(images/cards/' + type + '+' + brand + '.png)');
+        $(this).css('background-size', '140px 200px');
+        $(this).css('background-repeat', 'no-repeat');
+    });
 }
