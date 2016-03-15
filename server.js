@@ -213,6 +213,8 @@ io.on('connection', function (socket) {
                             // update speler hand
                             fn(true);
                             socket.emit('update_player_hand', server.players[player].hand);
+                            
+                            console.log('updating player hands');
                         }
                         else {
                             fn(false);
@@ -256,6 +258,7 @@ function take(server, amount, joker) {
             if(server.currentTurnOrder < server.players[player].currentTurnOrder) {
                 nextPlayer = server.players[player];
                 socketId = player;
+                console.log(server.players[player].name + " take");
                 break;
             }
         }
@@ -267,6 +270,7 @@ function take(server, amount, joker) {
                         nextPlayer = server.players[player];
                         found = true;
                         socketId = player;
+                        console.log(server.players[player].name + " take");
                         break;
                     }
                 } 
@@ -281,6 +285,7 @@ function take(server, amount, joker) {
                     nextPlayer = server.players[player];
                     found = true;
                     socketId = player;
+                    console.log(server.players[player].name + " take");
                     break;
                 }
             }
@@ -293,6 +298,7 @@ function take(server, amount, joker) {
                 if(start < server.players[player].currentTurnOrder) {
                     nextPlayer = server.players[player];
                     socketId = player;
+                    console.log(server.players[player].name + " take");
                     break;
                 }
             }
