@@ -21,6 +21,40 @@
     height: 20px;
 }
 
+.player-list {
+    width: 200px;
+    height: 200px;
+    border: 1px solid black;
+}
+
+.start-game {
+    visibility: hidden;
+}
+
+.hand {
+    width: 800px;
+    border: 1px solid black;
+}
+
+.hand-card {
+    width: 100px;
+    height: 200px;
+    border: 1px solid red;
+    display: inline-block;
+    vertical-align: bottom;
+    cursor: pointer;
+}
+
+.stack {
+    width: 100px;
+    height: 200px;
+    border: 1px solid red;
+}
+
+.remaining {
+    cursor: pointer;
+}
+
 #tableImg{
     width:50%;
 }

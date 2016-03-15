@@ -1,2 +1,0 @@
-C:\Users\Marten\Documents\GitHub\NodePesten\obj\Debug\NodePesten.njsprojResolveAssemblyReference.cache
-C:\Users\Marten\Documents\GitHub\NodePesten\bin\Microsoft.NodejsTools.WebRole.dll

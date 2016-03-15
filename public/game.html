@@ -5,6 +5,7 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css">
         <script src="/socket.io/socket.io.js"></script>
         <script src="js/jquery-2.2.1.min.js"></script>
+        <script src="network-game.js"></script>
         <script src="client.js"></script>
 	</head>
 
@@ -18,6 +19,14 @@
         <h1>Pagina waar het spel gespeeld wordt</h1>
         <h2 class="server-name"></h2>
         
+        <h3>Playerlist</h3>
+        <div class="player-list">
+            <ul>
+                
+            </ul>
+        </div>
+        
+        <h3>Chatbox</h3>
         <div class="chatbox">
             <div class="chatbox-messages">
                 <ul>
@@ -27,6 +36,22 @@
             <input class="chatbox-input" type="text">
         </div>
         
+        <h3>Jouw kaarten</h3>
+        <div class="hand">
+            
+        </div>
+        
+        <h3>pack afneemdinges</h3>
+        <div class="stack remaining">
+            --
+        </div>
+        
+        <h3>stack</h3>
+        <div class="stack pot">
+            --
+        </div>
+        
         <button class="leave-server">disconnect van server</button>
+        <button class="start-game">start spel (als host)</button>
 	</body>
 </html>
