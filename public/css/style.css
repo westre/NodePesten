@@ -64,6 +64,12 @@
 
 .remaining {
     cursor: pointer;
+    position: absolute;
+    left:50%;
+    top: 60%;
+    text-align: center;
+    z-index: 10;
+
 }
 
 #playingCardsImg{

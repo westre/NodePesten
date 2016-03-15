@@ -88,7 +88,7 @@ function joinServer() {
     socket.emit('join_server', { server: localStorage.getItem("server"), player: localStorage.getItem("player") }, function (isHost, serverState, playerList) {
         server = localStorage.getItem("server");
         player = localStorage.getItem("player");
-        
+        backgroundDynamic();
         if(serverState == 'playing') {  
             alert('sorry spel is al begonnen');
             leaveServer();
