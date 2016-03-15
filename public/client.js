@@ -43,6 +43,7 @@ $(document).ready(function () {
         
         if(myTurn) {
             // stuur commando naar server
+            myTurn = false;
             socket.emit('place_card', { server: server, card: card, suit: suit }, function (isValid) {
                 if(!isValid)
                     myTurn = true;
@@ -59,7 +60,7 @@ $(document).ready(function () {
         if(myTurn) {
             // stuur commando naar server
             socket.emit('request_new_card', server);
-            alert("jap");
+            myTurn = false;
         }
         else {
             alert("het is niet jouw beurt vriend");
