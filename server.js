@@ -1,7 +1,7 @@
 var express = require('express');
 var app = require('express')();
 app.use(express.static('public'));
-var server = app.listen(3000);
+var server = app.listen(process.env.PORT || 3000);
 var io = require('socket.io').listen(server);
 
 // johnnys gamejs
@@ -10,7 +10,7 @@ eval(require('fs').readFileSync('public/network-game.js').toString());
 var servers = [ 
     { name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
     { name: 'Kamer 2', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
-    { name: 'Kamer 3', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true } 
+    { name: 'Jonathans SM dungeon', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true } 
 ];
 
 io.on('connection', function (socket) {    
@@ -192,7 +192,7 @@ io.on('connection', function (socket) {
                             
                             switch (true) {		
                                 case (server.players[player].hand[card].card == 0): // Joker pak 5
-                                    take(server, 5, true);
+                                    take(server, 5);
                                     break;
                                     
                                 case (server.players[player].hand[card].card == 1): // Aas is keer
@@ -271,12 +271,12 @@ function getServerByName(name) {
 }
 
 function skip(server) {
-    next(server);
+    next(server, true);
     next(server);
 }
 
 // Kaarten pakken
-function take(server, amount, joker) {
+function take(server, amount) {
 	server.takeAmount = server.takeAmount + amount;
 	next(server);
 }
@@ -293,7 +293,7 @@ function rotate(server) {
     console.log("rotate");
 }
 
-function next(server) {
+function next(server, ignore) {
     if(server.rotation) {
         var found = false;
         for(var player in server.players) {
@@ -306,7 +306,7 @@ function next(server) {
         }
         
         if(!found) {
-            server.currentTurnOrder = 0; // dit gaat fout
+            server.currentTurnOrder = 0;
             for(var from = 0; from < 100; from++) {
                 for(var player in server.players) {
                     if(from == server.players[player].turnOrder && !found) {
@@ -357,9 +357,12 @@ function next(server) {
         }
     }
     
-    // update game status aan alle clients binnen de kamer, stuur ook gelijk een chat message zeggend wie aan de beurt is                    
-    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: nextPlayer });
-    io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
+    // update game status aan alle clients binnen de kamer, stuur ook gelijk een chat message zeggend wie aan de beurt is   
+    if(ignore == null) {
+        io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: nextPlayer });
+        io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
+    }                 
+    
     
     return nextPlayer;
 }

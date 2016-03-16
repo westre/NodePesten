@@ -72,7 +72,7 @@ $(document).ready(function () {
 
 // wordt geroepen wanneer we in serverlist.html zitten
 function connect() {
-    socket = io.connect('http://localhost:3000');
+    socket = io.connect();
     
     // stuur een 'request_servers' commando naar de server voor een lijst met servers
     socket.emit('request_servers', function (servers) {
@@ -84,7 +84,7 @@ function connect() {
 
 // wordt geroepen wanneer we in game.html zitten
 function joinServer() {
-    socket = io.connect('http://localhost:3000');
+    socket = io.connect();
     
     // stuur een 'join' commando naar de server
     socket.emit('join_server', { server: localStorage.getItem("server"), player: localStorage.getItem("player") }, function (isHost, serverState, playerList) {
