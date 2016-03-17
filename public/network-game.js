@@ -1,32 +1,3 @@
-// Debug, log spel in console
-var DEBUG = true;
-
-// Init
-//var pack = []; // Pot
-//var stack = []; // Aflegstapel
-
-// Vars
-//var takeAmount = 0; // Current amount to take cards
-//var rotation = true; // Default: true, true = clockwise | false = counterclockwise
-
-// Beurt
-var players;
-var turn = 1; // Default:1, huidige speler
-
-// Default config
-var config = { jokers: 2, cards: 7, five: false, takelast: 2 };
-// config.jokers;   Default:2,     Aantal jokers in het spel
-// config.cards;    Default:7,     Aantal beginkaarten
-// config.five;     Default:false, Vijf pak een wijf regel
-// config.takelast; Default:2,     2 of 5 pakken gebruikelijk, als je met een pestkaart uitkomt
-
-// Set de gameconfig
-// config({jokers: 2, cards: 7, five: false, takelast: 2}, players array)
-function setconfig(settings, playerList) {
-	config = settings;
-	players = playerList;
-}
-
 // networked
 function create() {
 	// Kaarten:
@@ -53,7 +24,7 @@ function create() {
 			pack[count++] = { card: c, suit: suits[s] }; // Voer kaart object toe aan de pot
 		}
 	// Voeg Jokers toe
-	for (i = 0; i < config.jokers; i++)
+	for (i = 0; i < 2; i++)
 		pack[count++] = { card: 0, suit: "J" }; // 0 = Joker, J = Joker
 	
 	return pack;
@@ -126,20 +97,10 @@ function start(pack, stack) {
 // networked
 function possible(stack, card) {
 	var topcard = stack[stack.length - 1];
-	if (card.suit == topcard.suit || card.suit == "J" || card.card == topcard.card || (topcard.suit == "J" && card.card == 2) || (topcard.card == 1 && card.card == 2)) {
-        return true;
-    }
-    return false;
-		/*switch (true) {		
-			case (card.card == 0):// Joker pak 5
-				return true;
-			case (card.card == 1):// Aas is keer
-				return true;
-			case (card.card < topcard.card):// Getallen
-				return false;
-			default:
-				return true;
-		}*/
+	if (card.suit == topcard.suit || card.suit == "J" || card.card == topcard.card || (topcard.suit == "J" && card.card == 2) || ((topcard.card == 1 && card.card == 2) && topcard.suit == card.suit)) {
+		return true;
+	}
+	return false;
 }
 
 // networked
@@ -147,11 +108,11 @@ function possible(stack, card) {
 function change(stack, suit) {
 	var topcard = stack[stack.length - 1];
 	topcard.suit = suit;
-	//DEBUG && console.log("Symbool veranderd naar: " + fancy(topcard).suit);
+	DEBUG && console.log("Symbool veranderd naar: " + fancy(topcard).suit);
 }
 
 
-
+// Geeft een string terug om weer te geven
 function fancy(origCard, toString) {
 	var card = { card: origCard.card, suit: origCard.suit };
 	switch (card.suit) {
@@ -199,7 +160,7 @@ function fancy(origCard, toString) {
 
 
 function knockknock(player) {
-	players[player - 1].knockknock = true;
+	//players[player - 1].knockknock = true;
 }
 
 
