@@ -1,6 +1,6 @@
 var express = require('express');
 var app = require('express')();
-require("E:/_Sorted/Projects/Web Developing/NodePesten/node_modules/node-codein");
+//require("E:/_Sorted/Projects/Web Developing/NodePesten/node_modules/node-codein");
 app.use(express.static('public'));
 var server = app.listen(process.env.PORT || 8080);
 var io = require('socket.io').listen(server);
@@ -147,11 +147,12 @@ io.on('connection', function (socket) {
                 // jokertje, 2tje
 				if (server.takeAmount > 0) {
                     socket.emit('message', server.players[player].name + ' heeft geen kaarten, moet kaarten pakken: ' + server.takeAmount);
-        
-                    var drawnCards = draw(server.pack, server.takeAmount);
                     
-					for (var card in drawnCards) {
-                        server.players[player].hand.push(drawnCards[card]);
+                    for(var cardInt = 1; cardInt <= server.takeAmount; cardInt++) {
+                        if(server.pack.length == 0) {
+                            reshufflePlease(server, player);
+                        }
+                        server.players[player].hand.push(draw(server.pack, 1)[0]);       
                     }
                     
                     // update speler hand
@@ -169,28 +170,14 @@ io.on('connection', function (socket) {
                     }
                 }
                 else {
-                    if(server.pack.length > 0) {
-                        // todo reshuffle
-                server.players[player].hand.push(draw(server.pack, 1)[0]);
-                socket.emit('update_player_hand', server.players[player].hand);
-                next(server);
-            }
-                    else {
-                        var topcard = server.stack[server.stack.length - 1];
-                        server.stack.splice(0, 1);
-
-                        server.pack = server.stack;
-                        shuffle(server.pack);
-                        
-                        server.stack = [];
-                        server.stack.push(topcard);
-                        
-                        io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
-                        io.to(server.name).emit('message', 'geen kaarten gevonden, reshuffling');
-                        
-                        console.log("geen kaarten meer gevonden");
-        } 
-        } 
+                    if(server.pack.length == 0) {
+                        reshufflePlease(server, player);
+                    }
+                    
+                    server.players[player].hand.push(draw(server.pack, 1)[0]);
+                    socket.emit('update_player_hand', server.players[player].hand);
+                    next(server);
+                } 
             }
         } 
     });
@@ -289,6 +276,22 @@ function getServerByName(name) {
     return found;  
 }
 
+function reshufflePlease(server, player) {
+    var topcard = server.stack[server.stack.length - 1];
+    server.stack.splice(0, 1);
+
+    server.pack = server.stack;
+    shuffle(server.pack);
+    
+    server.stack = [];
+    server.stack.push(topcard);
+    
+    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+    io.to(server.name).emit('message', 'geen kaarten gevonden, reshuffling');
+    
+    console.log("geen kaarten meer gevonden");
+}
+
 function skip(server) {
     next(server, true);
     next(server);
@@ -298,7 +301,7 @@ function skip(server) {
 function take(server, amount) {
 	server.takeAmount = server.takeAmount + amount;
 	next(server);
-        }
+}
 
 // Verander draairichting
 function rotate(server) {
@@ -381,8 +384,8 @@ function next(server, ignore) {
     
     // update game status aan alle clients binnen de kamer, stuur ook gelijk een chat message zeggend wie aan de beurt is                    
 	if (!ignore) {
-    io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: nextPlayer });
-    io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
+        io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: nextPlayer });
+        io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
     }                 
     
     
