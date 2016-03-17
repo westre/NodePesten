@@ -168,9 +168,27 @@ io.on('connection', function (socket) {
                     }
                 }
                 else {
-                    server.players[player].hand.push(draw(server.pack, 1)[0]);
-                    socket.emit('update_player_hand', server.players[player].hand);
-                    next(server);  
+                    if(server.pack.length > 0) {
+                        // todo reshuffle
+                        server.players[player].hand.push(draw(server.pack, 1)[0]);
+                        socket.emit('update_player_hand', server.players[player].hand);
+                        next(server);  
+                    }
+                    else {
+                        var topcard = server.stack[server.stack.length - 1];
+                        server.stack.splice(0, 1);
+
+                        server.pack = server.stack;
+                        shuffle(server.pack);
+                        
+                        server.stack = [];
+                        server.stack.push(topcard);
+                        
+                        io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+                        io.to(server.name).emit('message', 'geen kaarten gevonden, reshuffling');
+                        
+                        console.log("geen kaarten meer gevonden");
+                    }
                 }
             }
         } 
