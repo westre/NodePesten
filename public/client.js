@@ -164,10 +164,11 @@ function onReceivedChatMessage(data) {
 
 function onGameHasStarted(object) {   
     $(".start-game").remove();
-    $(".remaining").html(object.length + " kaarten");
+    $(".textRemaining").html(object.length + " kaarten");
     
-    $(".pot").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '">' + fancy(object.drawnCard[0], true) + '</div>');
-    
+    $(".played").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '"></div>');
+    $('.textPlayed').html('1 kaart');
+
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
     
@@ -192,17 +193,19 @@ function onPlayerUpdateHand(data) {
     $('.hand').html('');
     $.each(data, function (index, card) {
         if(card != null)
-            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + fancy(card, true) + '</div>');
+            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '"></div>');
     });
     backgroundDynamic();
 }
 
 function onGameUpdate(data) {  
-    $('.remaining').html(data.packLength + ' kaarten');
+    $('.textRemaining').html(data.packLength + ' kaarten');
     
-    $('.pot').html('');
-    $('.pot').html('<div class="hand-card" data-card="' + data.currentStackCard.card + '" data-suit="' + data.currentStackCard.suit + '">' + fancy(data.currentStackCard, true) + ' (' + data.stackLength + ' kaarten)</div>');
+    $('.played').html('');
+    $('.played').html('<div class="hand-card" data-card="' + data.currentStackCard.card + '" data-suit="' + data.currentStackCard.suit + '"></div>');
     
+    $('.textPlayed').html(data.stackLength + ' kaarten');
+
     console.log(data);
     
     // vraag mij niet waarom...
@@ -226,7 +229,7 @@ function backgroundDynamic(){
         var brand = $(this).attr('data-suit');
         
         $(this).css('background-image', 'url(images/cards/' + type + '+' + brand + '.png)');
-        $(this).css('background-size', '140px 200px');
+        $(this).css('background-size', '105px 150px');
         $(this).css('background-repeat', 'no-repeat');
     });
 }

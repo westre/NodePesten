@@ -7,6 +7,8 @@
 }
 
 .chatbox {
+    
+    text-align: left;
     width: 300px;
     height: 300px;
     border: 2px solid #810000;
@@ -17,6 +19,7 @@
     width: 100%;
     height: 280px;
     overflow: scroll;
+    
 }
 
 .chatbox-input {
@@ -25,6 +28,7 @@
 }
 
 .player-list {
+    
     width: 300px;
     height: 200px;
     border: 2px solid #810000;
@@ -35,42 +39,79 @@
 }
 
 .hand {
-    width: 800px;
-    border: 1px solid black;
+    display: block;
+        
 }
 
 .hand-card {
-    width: 140px;
-    height: 200px;
+    width: 105px;
+    height: 150px;
     
     display: inline-block;
     vertical-align: bottom;
     cursor: pointer;
-    /*background-image:url(http://localhost:3000/images/cards/9_of_clubs.png);
-    background-size: 140px 200px;
-    background-repeat:no-repeat;*/
+    
     
 }
 
-.stack {
+div.hand .hand-card{
+    margin: 10px;
+}
+
+.played {
+    display: block;
     position: absolute;
-    left: 50%;
-    top: 40%;
-    width: 100px;
-    text-align: center;
+    left: 55%;
+    top: 10%;
+    width: 105px;
+    height: 150px;
     z-index: 10;
-    height: 200px;
+    
    
 }
 
 .remaining {
+    display: block;
     cursor: pointer;
     position: absolute;
-    left:50%;
-    top: 60%;
-    text-align: center;
+    left:10%;
+    top: 10%;
+    width: 105px;
+    height: 150px;
     z-index: 10;
-    border: 10px solid pink;
+    background-image: url(/images/backside.png);
+    background-repeat: no-repeat;
+    background-size: 105px 150px;
+    
+    
+}
+
+.textRemaining{
+    display: block;
+    cursor: pointer;
+    position: absolute;
+    left:10%;
+    top: 40%;
+    width: 105px;
+    height: 25px;
+    z-index: 10;
+    background-color:#080640;
+    color:#FFFFFF;
+    text-align: center;
+}
+
+.textPlayed{
+    display: block;
+    cursor: pointer;
+    position: absolute;
+    left:55%;
+    top: 40%;
+    width: 105px;
+    height: 25px;
+    z-index: 10;
+    background-color:#080640;
+    color:#FFFFFF;
+    text-align: center;
 }
 
 #playingCardsImg{
@@ -80,25 +121,33 @@
 }
 
 body{
-    background-color: #AE2411;
+    display: block;
+    background-color: #B28F61;
     width: 100%;
     height: 100%;
     font-family: 'Lato', sans-serif;
+    font-size: 20px;
     /*overflow-y: hidden;
     overflow-x: hidden;*/
-    color: #64ffa6;
+    color: #3B2F20;
+    
 }
 
 h1{
-    color: #00AE5A;
+    color: #3B2F20;
     text-align: center;
-    font-size: 90px;
+    font-size: 60px;
 }
 
 h2{
-    color: #00994F;
+   
+    color: #D3F0FF;
     text-align: center;
     font-size: 40px;
+}
+
+h3{
+    
 }
 
 a{
@@ -108,20 +157,60 @@ a{
 }
 
 a:hover{
-    color: #FFFFFF;
+    color: #3B2F20;
     transition: all 200ms ease-in;
 }
 
 h2:hover{
-    color: #FFFFFF;
+    color: #3B2F20;
     transition: all 200ms ease-in;
 }
 
 #table{
-    position: absolute;
-    left: 0;
-    top: 30%;
+    display:inline-block;
+    position: relative;
+}
+#tableImg{
+   
+   display: block;
     width: 100%;
     text-align: center;
+    z-index: -1;
 }
+
+#body{
+    display: table;
+    
+    margin: 0px auto;
+}
+
+.center{
+    text-align:center;
+}
+
+.totaltable{
+    display:inline-block;
+
+}
+
+#leftColumn{
+    display:inline-block;
+}
+
+#gameTitle{
+    text-align: left;
+}
+
+button{
+    background-color:#3B2F20;
+    color:#D3F0FF;
+    border: 0px;
+}
+
+button:hover{
+    background-color:#B28F61;
+    transition: all 200ms ease-in;
+}
+
+
 
