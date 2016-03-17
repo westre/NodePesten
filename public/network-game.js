@@ -61,7 +61,7 @@ function draw(pack, amount) {
 }
 
 // Herschudden van de pot
-function reshuffle() {
+function reshuffle(stack, pack) {
 	var topcard = stack[stack.length - 1];
 	stack.splice(0, 1);
 	var temppack;
@@ -75,7 +75,7 @@ function reshuffle() {
 			});
 		else
 			pack.push(temppack[0]);
-	shuffle();
+	shuffle(pack);
 	stack = [];
 	stack.push(topcard);
 }
