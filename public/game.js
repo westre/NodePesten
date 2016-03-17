@@ -28,6 +28,7 @@ function setconfig(settings, playerList) {
 }
 
 function create() {
+    
 	// Kaarten:
 	// 1 = Aas
 	// 2 t/m 10 = getallen
@@ -97,6 +98,7 @@ function reshuffle() {
 
 // Gooi eerste kaart op van de pot
 function start() {
+    backgroundDynamic();
 	var startingcard = pack[0]; // Haal startkaart uit de pot en sla deze op
 	if (startingcard.card != 0) { // Niet beginnen met een joker
 		pack.splice(0, 1); // Haal de kaart uit de pot
@@ -328,4 +330,15 @@ function take(amount, joker) {
 		takeAmount = 0;
 		next();
 	}
+}
+
+function backgroundDynamic() {
+    $('.hand-card').each(function () {
+        var type = $(this).attr('data-card');
+        var brand = $(this).attr('data-suit');
+        
+        $(this).css('background-image', 'url(images/cards/' + type + '+' + brand + '.png)');
+        $(this).css('background-size', '140px 200px');
+        $(this).css('background-repeat', 'no-repeat');
+    });
 }
