@@ -152,6 +152,14 @@ function sendChatMessage(message) {
 function onReceivedChatMessage(data) {
     console.log(data);
     $(".chatbox-messages ul").append('<li>' + data + '</li>');
+    
+    var height = 0;
+    $('.chatbox-messages ul li').each(function(i, value){
+        height += parseInt($(this).height());
+    });
+    height += '';
+
+    $('.chatbox-messages').animate({scrollTop: height});
 }
 
 function onGameHasStarted(object) {   
