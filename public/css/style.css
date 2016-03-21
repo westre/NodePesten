@@ -166,6 +166,14 @@ h2:hover{
     transition: all 200ms ease-in;
 }
 
+input{
+    font-family: 'Lato', sans-serif;
+}
+
+li{
+    text-align: center;
+    list-style-type:none;
+}
 #table{
     display:inline-block;
     position: relative;
@@ -203,13 +211,24 @@ h2:hover{
 
 button{
     background-color:#3B2F20;
-    color:#D3F0FF;
+    color:#B28F61;
     border: 0px;
+    padding: 10px;
+    margin: 5px;
 }
 
 button:hover{
-    background-color:#B28F61;
+    color: #D3F0FF;
     transition: all 200ms ease-in;
+}
+
+#inputName{
+    text-align: center;
+    margin: 10px;
+}
+
+.content{
+    text-align: center;
 }
 
 
