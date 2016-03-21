@@ -169,6 +169,8 @@ function onGameHasStarted(object) {
     $(".played").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '"></div>');
     $('.textPlayed').html('1 kaart');
 
+    $(".server-name").html('Je zit in server: ' + server + ', status: playing'); 
+    
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
     

@@ -68,7 +68,11 @@ io.on('connection', function (socket) {
         delete leftServer.players[socket.id];
         
         // update bestaande spelers en zeg dat er een nieuwe speler is geleaved
-        io.to(server).emit('update_player_list', leftServer.players);    
+        io.to(server).emit('update_player_list', leftServer.players); 
+        
+        if(Object.keys(leftServer.players).length == 0) {
+            resetServer(leftServer);
+        }   
 	});
     
     // dit wordt geroepen wanneer we een chat message event krijgen van de client
@@ -92,6 +96,10 @@ io.on('connection', function (socket) {
                     
                     // update bestaande spelers en zeg dat er een nieuwe speler is geleaved
                     io.to(server).emit('update_player_list', servers[server].players); 
+                    
+                    if(Object.keys(servers[server].players).length == 0) {
+                        resetServer(leftServer);
+                    }   
                     break;
                 }               
             }
@@ -167,6 +175,9 @@ io.on('connection', function (socket) {
                             next(server);
                             console.log('promptsuitchange: ' + promptData);
                         });
+                    }
+                    else if(topCard.card == 2) {
+                        next(server);
                     }
                 }
                 else {
@@ -276,6 +287,18 @@ function getServerByName(name) {
     return found;  
 }
 
+function resetServer(server) {
+    server.pack = [];
+    server.stack = [];
+    server.players = {};
+    server.state = 'lobby';
+    server.currentTurnOrder = -1;
+    server.takeAmount = 0;
+    server.rotation = true;
+    
+    console.log(server.name + " gereset");
+}
+
 function reshufflePlease(server, player) {
     var topcard = server.stack[server.stack.length - 1];
     server.stack.splice(0, 1);
@@ -319,12 +342,13 @@ function next(server, ignore) {
 	console.log(server.rotation);
 	console.log(server.currentTurnOrder);
 	console.log(server.players);
+    
 	if (server.rotation) {
         var found = false;
         for(var player in server.players) {
             if(server.currentTurnOrder < server.players[player].turnOrder) {
                 server.currentTurnOrder = server.players[player].turnOrder;
-                console.log("Rotation = true");
+                console.log("Rotation = true 1");
                 found = true;
                 break;
             }
@@ -337,7 +361,7 @@ function next(server, ignore) {
 					if (from == server.players[player].turnOrder && !found) {
                         server.currentTurnOrder = server.players[player].turnOrder;
                         found = true;
-                        console.log("Rotation = true");
+                        console.log("Rotation = true 2");
                         break;
                     }
                 }
@@ -346,12 +370,12 @@ function next(server, ignore) {
     }
     else {
         var found = false;
-        for(var from = server.currentTurnOrder; from > 0; from--) {
+        for(var from = server.currentTurnOrder - 1; from > 0; from--) {
             for(var player in server.players) {
-                if(from == server.players[player].turnOrder) {
+                if(from == server.players[player].turnOrder && !found) {
                     server.currentTurnOrder = server.players[player].turnOrder;
                     found = true;
-                    console.log("Rotation = false");
+                    console.log("Rotation = false 1");
                     break;
                 }
             }
@@ -360,11 +384,10 @@ function next(server, ignore) {
         if(!found) {
             // zoek hoogste turn order
             var start = 0;
-			for (var player in (server.players).reverse()) {
+			for (var player in server.players) {
 				if (start < server.players[player].turnOrder) {
                     start = server.players[player].turnOrder;
-                    console.log("Rotation = false");
-                    break;
+                    console.log("Rotation = false 2");
                 }
             }
             
