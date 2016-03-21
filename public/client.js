@@ -130,7 +130,7 @@ function joinServer() {
     });
     
     socket.on('prompt_suit_change', function (fn) {
-        fn(prompt("je suit graag"));
+        onPromptSuitChange(fn);
     });
 }
 
@@ -222,7 +222,7 @@ function onGameUpdate(data) {
 }
 
 function onPromptSuitChange(fn) {
-    fn(prompt("je suit graag"));
+    fn(prompt("Kies een symbool: [H]arten, [K]laver, [R]uiten, [S]choppen"));
 }
 
 function backgroundDynamic(){

@@ -170,11 +170,7 @@ io.on('connection', function (socket) {
                     
                     var topCard = server.stack[server.stack.length - 1];
 					if (topCard.card == 0) {
-                        socket.emit('prompt_suit_change', function (promptData) {
-                            change(server.stack, promptData);
-                            next(server);
-                            console.log('promptsuitchange: ' + promptData);
-                        });
+                        promptSuitChange(server, socket);
                     }
                     else if(topCard.card == 2) {
                         next(server);
@@ -229,10 +225,7 @@ io.on('connection', function (socket) {
                                     break;
                                     
                                 case (server.players[player].hand[card].card == 11): // Boer veranderd
-                                    socket.emit('prompt_suit_change', function (promptData) {
-                                        change(server.stack, promptData);
-                                        next(server);
-                                    });                                    
+                                    promptSuitChange(server, socket);                        
                                     break;
                                     
                                 case (server.players[player].hand[card].card == 13): // Koning
@@ -285,6 +278,21 @@ function getServerByName(name) {
     });
     
     return found;  
+}
+
+function promptSuitChange(server, socket) {
+    socket.emit('prompt_suit_change', function (promptData) {
+        if(promptData == 'H' || promptData == 'K' || promptData == 'S' || promptData == 'R') {
+            change(server.stack, promptData);
+            next(server);
+        }
+        else {
+            promptSuitChange(server, socket);
+            console.log('failed');
+        }
+        
+        console.log('promptsuitchange: ' + promptData);
+    });
 }
 
 function resetServer(server) {
