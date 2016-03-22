@@ -2,6 +2,7 @@ var socket = null;
 var host = false;
 var server = null;
 var player = null;
+var gameStarted = false;
 
 $(document).ready(function () {
     $('input[name="player-name"]').val(localStorage.getItem("player"));
@@ -24,6 +25,7 @@ $(document).ready(function () {
         var key = e.which;
         if(key == 13) { // the enter key code
             sendChatMessage($(this).val());
+            $(this).val('');
         }
     });
     
@@ -36,7 +38,9 @@ $(document).ready(function () {
 	});
     
     // voor de spelers zodat ze op hun kaart kunnen klikken en het ook verwerkt wordt
-    $(".hand").on("click", ".hand-card", function () {        
+    $(".hand").on("click", ".hand-card", function () {
+        if(!gameStarted) return;
+                
         var card = $(this).data('card');
         var suit = $(this).data('suit');
         
@@ -58,6 +62,8 @@ $(document).ready(function () {
 	});
     
     $(document).on("click", ".remaining", function () {
+        if(!gameStarted) return;
+        
         socket.emit('is_it_my_turn', server, function (myTurn) {
             if(myTurn) {
                 //alert("Valide zet");
@@ -142,6 +148,7 @@ function joinServer() {
 function leaveServer() {
     socket.emit('leave_server', server);   
     window.location.href = "serverlist.html";
+    gameStarted = false;
 }
 
 function sendChatMessage(message) {
@@ -166,7 +173,9 @@ function onReceivedChatMessage(data) {
     $('.chatbox-messages').animate({scrollTop: height});
 }
 
-function onGameHasStarted(object) {   
+function onGameHasStarted(object) {
+    gameStarted = true;
+       
     $(".start-game").remove();
     $(".textRemaining").html(object.length + " kaarten");
     
