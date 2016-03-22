@@ -191,6 +191,7 @@ io.on('connection', function (socket) {
     
     socket.on('place_card', function (data, fn) {
         var server = getServerByName(data.server);
+        var gameEnded = false;
         
         // zoek speler
         for(var player in server.players) {
@@ -228,9 +229,9 @@ io.on('connection', function (socket) {
                                     promptSuitChange(server, socket);                        
                                     break;
                                     
-                                case (server.players[player].hand[card].card == 13): // Koning
+                                /*case (server.players[player].hand[card].card == 13): // Koning
                                     io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
-                                    break;
+                                    break;*/
                                     
                                 default:
                                     next(server);
@@ -244,6 +245,11 @@ io.on('connection', function (socket) {
                             fn(true);
                             socket.emit('update_player_hand', server.players[player].hand);
                             
+                            if(Object.keys(server.players[player].hand).length == 0) {
+                                io.to(data.server).emit('message', 'Spel is gewonnen door: ' + server.players[player].name);
+                                gameEnded = true;
+                            }
+                            
                             console.log('updating player hands');
                         }
                         else {
@@ -253,6 +259,11 @@ io.on('connection', function (socket) {
                     }
                 }              
             }
+        }
+        
+        if(gameEnded) {
+            io.to(data.server).emit('all_leave_server');
+            resetServer(server);
         }
 	});
     
@@ -394,8 +405,10 @@ function next(server, ignore) {
             var start = 0;
 			for (var player in server.players) {
 				if (start < server.players[player].turnOrder) {
-                    start = server.players[player].turnOrder;
-                    console.log("Rotation = false 2");
+                    if(server.currentTurnOrder != server.players[player].turnOrder) {
+                        start = server.players[player].turnOrder;
+                        console.log("Rotation = false 2");
+                    }
                 }
             }
             

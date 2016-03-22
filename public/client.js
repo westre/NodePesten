@@ -132,6 +132,10 @@ function joinServer() {
     socket.on('prompt_suit_change', function (fn) {
         onPromptSuitChange(fn);
     });
+    
+    socket.on('all_leave_server', function () {
+        leaveServer();
+    });
 }
 
 // wordt geroepen wanneer we op disconnect button klikken
