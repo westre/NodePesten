@@ -130,7 +130,7 @@ function joinServer() {
     });
     
     socket.on('prompt_suit_change', function (fn) {
-        fn(prompt("je suit graag"));
+        onPromptSuitChange(fn);
     });
 }
 
@@ -169,6 +169,8 @@ function onGameHasStarted(object) {
     $(".played").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '"></div>');
     $('.textPlayed').html('1 kaart');
 
+    $(".server-name").html('Je zit in server: ' + server + ', status: playing'); 
+    
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
     
@@ -220,7 +222,7 @@ function onGameUpdate(data) {
 }
 
 function onPromptSuitChange(fn) {
-    fn(prompt("je suit graag"));
+    fn(prompt("Kies een symbool: [H]arten, [K]laver, [R]uiten, [S]choppen"));
 }
 
 function backgroundDynamic(){
