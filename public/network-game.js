@@ -1,3 +1,5 @@
+var DEBUG = false;
+
 // networked
 function create() {
 	// Kaarten:
@@ -61,7 +63,7 @@ function draw(pack, amount) {
 }
 
 // Herschudden van de pot
-function reshuffle(stack, pack) {
+/*function reshuffle(stack, pack) {
 	var topcard = stack[stack.length - 1];
 	stack.splice(0, 1);
 	var temppack;
@@ -78,7 +80,7 @@ function reshuffle(stack, pack) {
 	shuffle(pack);
 	stack = [];
 	stack.push(topcard);
-}
+}*/
 
 // networked
 // Gooi eerste kaart op van de pot
@@ -156,11 +158,6 @@ function fancy(origCard, toString) {
 			return card.suit + " " + card.card;
 	else
 		return card;
-}
-
-
-function knockknock(player) {
-	//players[player - 1].knockknock = true;
 }
 
 

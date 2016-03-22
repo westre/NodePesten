@@ -9,53 +9,54 @@
         <script src="client.js"></script>
 	</head>
 
-	<body>        
+	<body>    
+       
 		<script>
             $(document).ready(function () {
                 joinServer();  
             });         
         </script>
-        
-        <h1>Speelkamer</h1>
-        <h3 class="server-name"></h3>
-        
-        <h3>Playerlist</h3>
-        <div class="player-list">
-            <ul>
-                
-            </ul>
-        </div>
-        
-        <h3>Chatbox</h3>
-        <div class="chatbox">
-            <div class="chatbox-messages">
-                <ul>
-                    
-                </ul>
+        <div id="leftColumn">
+            <h1 id="gameTitle">Speelkamer</h1>
+            <button class="leave-server">Kamer uitgaan</button>
+            <button class="start-game">Spel starten</button>
+            <h3 class="server-name"></h3>
+
+            <h3>Playerlist</h3>
+            <div class="player-list">
+                <ul></ul>
             </div>
-            <input class="chatbox-input" type="text">
+
+            <h3>Chatbox</h3>
+            <div class="chatbox">
+                <div class="chatbox-messages">
+                    <ul></ul>
+                </div>
+                <input class="chatbox-input" type="text">
+            </div>
         </div>
-        
-        <h3>Jouw kaarten</h3>
-        <div class="hand">
-            
-        </div>
+       
         
         
-        <div class="stack remaining">
-            <h3>pack afneemdinges</h3>
-            --
-        </div>
-        
-        
-        <div class="stack pot">
-            <h3>stack</h3>
-            --
-        </div>
         <div id="table">
             <img src="images/table.png" id="tableImg" />
+            <div class="stack remaining">
+                
+            </div>
+            <div class="textRemaining"></div>
+
+
+            <div class="stack played">
+                
+            </div>
+            <div class="textPlayed"></div>
+
         </div>
-        <button class="leave-server">disconnect van server</button>
-        <button class="start-game">start spel (als host)</button>
+        <h3>Jouw kaarten</h3>
+        <div class="hand">
+
+        </div>
+        
+        
 	</body>
 </html>

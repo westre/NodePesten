@@ -2,6 +2,7 @@ var socket = null;
 var host = false;
 var server = null;
 var player = null;
+var gameStarted = false;
 
 $(document).ready(function () {
     $('input[name="player-name"]').val(localStorage.getItem("player"));
@@ -24,6 +25,7 @@ $(document).ready(function () {
         var key = e.which;
         if(key == 13) { // the enter key code
             sendChatMessage($(this).val());
+            $(this).val('');
         }
     });
     
@@ -36,7 +38,9 @@ $(document).ready(function () {
 	});
     
     // voor de spelers zodat ze op hun kaart kunnen klikken en het ook verwerkt wordt
-    $(".hand").on("click", ".hand-card", function () {        
+    $(".hand").on("click", ".hand-card", function () {
+        if(!gameStarted) return;
+                
         var card = $(this).data('card');
         var suit = $(this).data('suit');
         
@@ -58,6 +62,8 @@ $(document).ready(function () {
 	});
     
     $(document).on("click", ".remaining", function () {
+        if(!gameStarted) return;
+        
         socket.emit('is_it_my_turn', server, function (myTurn) {
             if(myTurn) {
                 //alert("Valide zet");
@@ -130,7 +136,11 @@ function joinServer() {
     });
     
     socket.on('prompt_suit_change', function (fn) {
-        fn(prompt("je suit graag"));
+        onPromptSuitChange(fn);
+    });
+    
+    socket.on('all_leave_server', function () {
+        leaveServer();
     });
 }
 
@@ -138,6 +148,7 @@ function joinServer() {
 function leaveServer() {
     socket.emit('leave_server', server);   
     window.location.href = "serverlist.html";
+    gameStarted = false;
 }
 
 function sendChatMessage(message) {
@@ -162,11 +173,16 @@ function onReceivedChatMessage(data) {
     $('.chatbox-messages').animate({scrollTop: height});
 }
 
-function onGameHasStarted(object) {   
+function onGameHasStarted(object) {
+    gameStarted = true;
+       
     $(".start-game").remove();
-    $(".remaining").html(object.length + " kaarten");
+    $(".textRemaining").html(object.length + " kaarten");
     
-    $(".pot").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '">' + fancy(object.drawnCard[0], true) + '</div>');
+    $(".played").html('<div class="hand-card" data-card="' + object.drawnCard[0].card + '" data-suit="' + object.drawnCard[0].suit + '"></div>');
+    $('.textPlayed').html('1 kaart');
+
+    $(".server-name").html('Je zit in server: ' + server + ', status: playing'); 
     
     // vraag mij niet waarom...
     var fixedSocketId = "/#" + socket.id;
@@ -192,17 +208,19 @@ function onPlayerUpdateHand(data) {
     $('.hand').html('');
     $.each(data, function (index, card) {
         if(card != null)
-            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '">' + fancy(card, true) + '</div>');
+            $('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '"></div>');
     });
     backgroundDynamic();
 }
 
 function onGameUpdate(data) {  
-    $('.remaining').html(data.packLength + ' kaarten');
+    $('.textRemaining').html(data.packLength + ' kaarten');
     
-    $('.pot').html('');
-    $('.pot').html('<div class="hand-card" data-card="' + data.currentStackCard.card + '" data-suit="' + data.currentStackCard.suit + '">' + fancy(data.currentStackCard, true) + ' (' + data.stackLength + ' kaarten)</div>');
+    $('.played').html('');
+    $('.played').html('<div class="hand-card" data-card="' + data.currentStackCard.card + '" data-suit="' + data.currentStackCard.suit + '"></div>');
     
+    $('.textPlayed').html(data.stackLength + ' kaarten');
+
     console.log(data);
     
     // vraag mij niet waarom...
@@ -217,7 +235,7 @@ function onGameUpdate(data) {
 }
 
 function onPromptSuitChange(fn) {
-    fn(prompt("je suit graag"));
+    fn(prompt("Kies een symbool: [H]arten, [K]laver, [R]uiten, [S]choppen"));
 }
 
 function backgroundDynamic(){
@@ -226,7 +244,7 @@ function backgroundDynamic(){
         var brand = $(this).attr('data-suit');
         
         $(this).css('background-image', 'url(images/cards/' + type + '+' + brand + '.png)');
-        $(this).css('background-size', '140px 200px');
+        $(this).css('background-size', '105px 150px');
         $(this).css('background-repeat', 'no-repeat');
     });
 }

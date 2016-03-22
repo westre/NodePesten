@@ -4,6 +4,7 @@ require("E:/_Sorted/Projects/Web Developing/NodePesten/node_modules/node-codein"
 app.use(express.static('public'));
 var server = app.listen(process.env.PORT || 8080);
 var io = require('socket.io').listen(server);
+var DEBUG = true;
 
 // johnnys gamejs
 eval(require('fs').readFileSync('public/network-game.js').toString());
@@ -69,6 +70,10 @@ io.on('connection', function (socket) {
 		
 		// update bestaande spelers en zeg dat er een nieuwe speler is geleaved
 		io.to(server).emit('update_player_list', leftServer.players);
+		
+		if (Object.keys(leftServer.players).length == 0) {
+			resetServer(leftServer);
+		}
 	});
 	
 	// dit wordt geroepen wanneer we een chat message event krijgen van de client
@@ -92,6 +97,10 @@ io.on('connection', function (socket) {
 					
 					// update bestaande spelers en zeg dat er een nieuwe speler is geleaved
 					io.to(server).emit('update_player_list', servers[server].players);
+					
+					if (Object.keys(servers[server].players).length == 0) {
+						resetServer(leftServer);
+					}
 					break;
 				}
 			}
@@ -148,10 +157,11 @@ io.on('connection', function (socket) {
 				if (server.takeAmount > 0) {
 					socket.emit('message', server.players[player].name + ' heeft geen kaarten, moet kaarten pakken: ' + server.takeAmount);
 					
-					var drawnCards = draw(server.pack, server.takeAmount);
-					
-					for (var card in drawnCards) {
-						server.players[player].hand.push(drawnCards[card]);
+					for (var cardInt = 1; cardInt <= server.takeAmount; cardInt++) {
+						if (server.pack.length == 0) {
+							reshufflePlease(server, player);
+						}
+						server.players[player].hand.push(draw(server.pack, 1)[0]);
 					}
 					
 					// update speler hand
@@ -161,35 +171,20 @@ io.on('connection', function (socket) {
 					
 					var topCard = server.stack[server.stack.length - 1];
 					if (topCard.card == 0) {
-						socket.emit('prompt_suit_change', function (promptData) {
-							change(server.stack, promptData);
-							next(server);
-							console.log('promptsuitchange: ' + promptData);
-						});
+						promptSuitChange(server, socket);
+					}
+					else if (topCard.card == 2) {
+						next(server);
 					}
 				}
 				else {
-					if (server.pack.length > 0) {
-						// todo reshuffle
-						server.players[player].hand.push(draw(server.pack, 1)[0]);
-						socket.emit('update_player_hand', server.players[player].hand);
-						next(server);
+					if (server.pack.length == 0) {
+						reshufflePlease(server, player);
 					}
-					else {
-						var topcard = server.stack[server.stack.length - 1];
-						server.stack.splice(0, 1);
-						
-						server.pack = server.stack;
-						shuffle(server.pack);
-						
-						server.stack = [];
-						server.stack.push(topcard);
-						
-						io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
-						io.to(server.name).emit('message', 'geen kaarten gevonden, reshuffling');
-						
-						console.log("geen kaarten meer gevonden");
-					}
+					
+					server.players[player].hand.push(draw(server.pack, 1)[0]);
+					socket.emit('update_player_hand', server.players[player].hand);
+					next(server);
 				}
 			}
 		}
@@ -197,6 +192,7 @@ io.on('connection', function (socket) {
 	
 	socket.on('place_card', function (data, fn) {
 		var server = getServerByName(data.server);
+		var gameEnded = false;
 		
 		// zoek speler
 		for (var player in server.players) {
@@ -206,38 +202,44 @@ io.on('connection', function (socket) {
 					// hebben we de juiste kaart gevonden?
 					if (server.players[player].hand[card].card == data.card && server.players[player].hand[card].suit == data.suit) {
 						if (possible(server.stack, server.players[player].hand[card])) {
+							
+							DEBUG && console.log("Player " + server.players[player].name + " speelt: " + fancy(server.players[player].hand[card], true));
 							// stack krijgt een kaartje er bij (van de speler)
 							server.stack.push({ card: data.card, suit: data.suit });
 							
 							switch (true) {		
 								case (server.players[player].hand[card].card == 0):// Joker pak 5
+									DEBUG && console.log("Pak 5");
 									take(server, 5);
 									break;
                                     
 								case (server.players[player].hand[card].card == 1):// Aas is keer
+									DEBUG && console.log("Aas is keer");
 									rotate(server);
 									break;
                                     
 								case (server.players[player].hand[card].card == 2):// 2 pak 2
+									DEBUG && console.log("Pak 2");
 									take(server, 2);
 									break;
                                     
 								case (server.players[player].hand[card].card == 7):// Zeven kleeft
+									DEBUG && console.log("Nog een keer");
 									io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
 									break;
                                     
 								case (server.players[player].hand[card].card == 8):// Acht wacht
+									DEBUG && console.log("Beurt overslaan");
 									skip(server);
 									break;
                                     
 								case (server.players[player].hand[card].card == 11):// Boer veranderd
-									socket.emit('prompt_suit_change', function (promptData) {
-										change(server.stack, promptData);
-										next(server);
-									});
+									DEBUG && console.log("Verander symbool");
+									promptSuitChange(server, socket);
 									break;
                                     
 								case (server.players[player].hand[card].card == 13):// Koning
+									DEBUG && console.log("Nog een keer");
 									io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
 									break;
                                     
@@ -253,6 +255,11 @@ io.on('connection', function (socket) {
 							fn(true);
 							socket.emit('update_player_hand', server.players[player].hand);
 							
+							if (Object.keys(server.players[player].hand).length == 0) {
+								io.to(data.server).emit('message', 'Spel is gewonnen door: ' + server.players[player].name);
+								gameEnded = true;
+							}
+							
 							console.log('updating player hands');
 						}
 						else {
@@ -262,6 +269,11 @@ io.on('connection', function (socket) {
 					}
 				}
 			}
+		}
+		
+		if (gameEnded) {
+			io.to(data.server).emit('all_leave_server');
+			resetServer(server);
 		}
 	});
 	
@@ -289,6 +301,49 @@ function getServerByName(name) {
 	return found;
 }
 
+function promptSuitChange(server, socket) {
+	socket.emit('prompt_suit_change', function (promptData) {
+		if (promptData == 'H' || promptData == 'K' || promptData == 'S' || promptData == 'R') {
+			change(server.stack, promptData);
+			next(server);
+		}
+		else {
+			promptSuitChange(server, socket);
+			console.log('failed');
+		}
+		
+		console.log('promptsuitchange: ' + promptData);
+	});
+}
+
+function resetServer(server) {
+	server.pack = [];
+	server.stack = [];
+	server.players = {};
+	server.state = 'lobby';
+	server.currentTurnOrder = -1;
+	server.takeAmount = 0;
+	server.rotation = true;
+	
+	console.log(server.name + " gereset");
+}
+
+function reshufflePlease(server, player) {
+	var topcard = server.stack[server.stack.length - 1];
+	server.stack.splice(0, 1);
+	
+	server.pack = server.stack;
+	shuffle(server.pack);
+	
+	server.stack = [];
+	server.stack.push(topcard);
+	
+	io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+	io.to(server.name).emit('message', 'geen kaarten gevonden, reshuffling');
+	
+	console.log("geen kaarten meer gevonden");
+}
+
 function skip(server) {
 	next(server, true);
 	next(server);
@@ -309,19 +364,16 @@ function rotate(server) {
 	
 	next(server);
 	
-	console.log("rotate");
+	DEBUG && console.log("Rotatie veranderd");
 }
 
 function next(server, ignore) {
-	console.log(server.rotation);
-	console.log(server.currentTurnOrder);
-	console.log(server.players);
 	if (server.rotation) {
 		var found = false;
 		for (var player in server.players) {
 			if (server.currentTurnOrder < server.players[player].turnOrder) {
 				server.currentTurnOrder = server.players[player].turnOrder;
-				console.log("Rotation = true");
+				console.log("Rotation = true 1");
 				found = true;
 				break;
 			}
@@ -334,7 +386,7 @@ function next(server, ignore) {
 					if (from == server.players[player].turnOrder && !found) {
 						server.currentTurnOrder = server.players[player].turnOrder;
 						found = true;
-						console.log("Rotation = true");
+						console.log("Rotation = true 2");
 						break;
 					}
 				}
@@ -343,12 +395,12 @@ function next(server, ignore) {
 	}
 	else {
 		var found = false;
-		for (var from = server.currentTurnOrder; from > 0; from--) {
+		for (var from = server.currentTurnOrder - 1; from > 0; from--) {
 			for (var player in server.players) {
-				if (from == server.players[player].turnOrder) {
+				if (from == server.players[player].turnOrder && !found) {
 					server.currentTurnOrder = server.players[player].turnOrder;
 					found = true;
-					console.log("Rotation = false");
+					console.log("Rotation = false 1");
 					break;
 				}
 			}
@@ -357,16 +409,16 @@ function next(server, ignore) {
 		if (!found) {
 			// zoek hoogste turn order
 			var start = 0;
-			for (var player in (server.players).reverse()) {
+			var reverseplayers = server.players.reverse();
+			for (var player in reverseplayers) {
 				if (start < server.players[player].turnOrder) {
-					start = server.players[player].turnOrder;
-					console.log("Rotation = false");
-					break;
-				} else if (start == server.players[player].turnOrder) {
-					start = false;
+					if (server.currentTurnOrder != server.players[player].turnOrder) {
+						start = server.players[player].turnOrder;
+						console.log("Rotation = false 2");
+					}
 				}
 				if (!start)
-					console.log("Next player is undifined");
+					console.log("Next player is undefined");
 			}
 			
 			server.currentTurnOrder = start;
@@ -379,7 +431,7 @@ function next(server, ignore) {
 		// jij bent aan de beurt!
 		if (server.players[player].turnOrder == server.currentTurnOrder) {
 			nextPlayer = { id: player, name: server.players[player].name };
-			console.log(server.players[player].name + " is aan de beurt");
+			DEBUG && console.log("Rotate: Player " + nextPlayer.name + " is aan zet");
 		}
 	}
 	
