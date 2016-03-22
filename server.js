@@ -247,7 +247,7 @@ io.on('connection', function (socket) {
                             socket.emit('update_player_hand', server.players[player].hand);
                             
                             if(Object.keys(server.players[player].hand).length == 0) {
-                                io.to(data.server).emit('message', 'Spel is gewonnen door: ' + server.players[player].name);
+                                io.to(data.server).emit('message', 'Spel is gewonnen door: ' + server.players[player].name + ', over 5 seconden stopt het spel.');
                                 gameEnded = true;
                             }
                             
@@ -263,8 +263,10 @@ io.on('connection', function (socket) {
         }
         
         if(gameEnded) {
-            io.to(data.server).emit('all_leave_server');
-            resetServer(server);
+            setTimeout(function() { 
+                io.to(data.server).emit('all_leave_server');
+                resetServer(server);
+            }, 5000);
         }
 	});
     
