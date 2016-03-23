@@ -97,9 +97,13 @@ function start(pack, stack) {
 }
 
 // networked
-function possible(stack, card) {
+function possible(stack, card, takeAmount) {
 	var topcard = stack[stack.length - 1];
-	if (card.suit == topcard.suit || card.suit == "J" || card.card == topcard.card || (topcard.suit == "J" && card.card == 2) || ((topcard.card == 1 && card.card == 2) && topcard.suit == card.suit)) {
+	if (card.suit == topcard.suit && (topcard.card != 2 && takeAmount == 0) || 
+		card.suit == "J" || 
+		card.card == topcard.card || 
+		(topcard.suit == "J" && card.card == 2)
+		) {
 		return true;
 	}
 	return false;

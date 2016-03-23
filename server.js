@@ -7,7 +7,7 @@ var io = require('socket.io').listen(server);
 var DEBUG = true;
 
 // johnnys gamejs
-eval(require('fs').readFileSync('public/network-game.js').toString());
+eval(require('fs').readFileSync('network-game.js').toString());
 
 var servers = [ 
 	{ name: 'Kamer 1', pack: [], stack: [], players: {}, state: 'lobby', currentTurnOrder: -1, takeAmount: 0, rotation: true }, 
@@ -201,7 +201,7 @@ io.on('connection', function (socket) {
 				for (var card in server.players[player].hand) {
 					// hebben we de juiste kaart gevonden?
 					if (server.players[player].hand[card].card == data.card && server.players[player].hand[card].suit == data.suit) {
-						if (possible(server.stack, server.players[player].hand[card])) {
+						if (possible(server.stack, server.players[player].hand[card], server.takeAmount)) {
 							
 							DEBUG && console.log("Player " + server.players[player].name + " speelt: " + fancy(server.players[player].hand[card], true));
 							// stack krijgt een kaartje er bij (van de speler)
@@ -260,7 +260,6 @@ io.on('connection', function (socket) {
 								gameEnded = true;
 							}
 							
-							console.log('updating player hands');
 						}
 						else {
 							fn(false);
@@ -373,7 +372,6 @@ function next(server, ignore) {
 		for (var player in server.players) {
 			if (server.currentTurnOrder < server.players[player].turnOrder) {
 				server.currentTurnOrder = server.players[player].turnOrder;
-				console.log("Rotation = true 1");
 				found = true;
 				break;
 			}
@@ -386,7 +384,6 @@ function next(server, ignore) {
 					if (from == server.players[player].turnOrder && !found) {
 						server.currentTurnOrder = server.players[player].turnOrder;
 						found = true;
-						console.log("Rotation = true 2");
 						break;
 					}
 				}
@@ -400,7 +397,6 @@ function next(server, ignore) {
 				if (from == server.players[player].turnOrder && !found) {
 					server.currentTurnOrder = server.players[player].turnOrder;
 					found = true;
-					console.log("Rotation = false 1");
 					break;
 				}
 			}
@@ -409,12 +405,11 @@ function next(server, ignore) {
 		if (!found) {
 			// zoek hoogste turn order
 			var start = 0;
-			var reverseplayers = server.players.reverse();
+			var reverseplayers = reverse(server.players);
 			for (var player in reverseplayers) {
 				if (start < server.players[player].turnOrder) {
 					if (server.currentTurnOrder != server.players[player].turnOrder) {
 						start = server.players[player].turnOrder;
-						console.log("Rotation = false 2");
 					}
 				}
 				if (!start)
@@ -441,6 +436,13 @@ function next(server, ignore) {
 		io.to(server.name).emit('message', 'de beurt is aan: ' + nextPlayer.name);
 	}
 	
-	
 	return nextPlayer;
+}
+
+function reverse(arr) {
+	var result = [];
+	for (var i = arr.length; i == 1; i--) {
+		result.push(arr[i]);
+	}
+	return result;
 }
