@@ -99,8 +99,7 @@ io.on('connection', function (socket) {
 					io.to(server).emit('update_player_list', servers[server].players);
 					
 					if (Object.keys(servers[server].players).length == 0) {
-						var server2 = getServerByName(server);
-						resetServer(server2);
+						resetServer(servers[server]);
 					}
 					break;
 				}
