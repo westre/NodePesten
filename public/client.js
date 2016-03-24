@@ -170,7 +170,7 @@ function sendChatMessage(message) {
 // we krijgen een 'message' commando van de server
 function onReceivedChatMessage(data) {
 	console.log(data);
-	$(".chatbox-messages ul").append('<li>' + data + '</li>');
+	$("<li/>").text(data).appendTo('.chatbox-messages ul');
 	
 	var height = 0;
 	$('.chatbox-messages ul li').each(function (i, value) {
