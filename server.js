@@ -1,6 +1,6 @@
 var express = require('express');
 var app = require('express')();
-require("E:/_Sorted/Projects/Web Developing/NodePesten/node_modules/node-codein");
+//require("E:/_Sorted/Projects/Web Developing/NodePesten/node_modules/node-codein");
 app.use(express.static('public'));
 var server = app.listen(process.env.PORT || 8080);
 var io = require('socket.io').listen(server);
