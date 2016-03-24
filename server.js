@@ -132,7 +132,7 @@ io.on('connection', function (socket) {
 			}
 			
 			// geef ieder speler 7 kaarten    
-			theServer.players[player].hand = draw(theServer.pack, 1);
+			theServer.players[player].hand = draw(theServer.pack, 7);
 			
 			// geef ook een turn order aan de speler
 			theServer.players[player].turnOrder = turnOrder;
