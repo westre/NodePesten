@@ -1,6 +1,3 @@
-var DEBUG = false;
-
-// networked
 function create() {
 	// Kaarten:
 	// 1 = Aas
@@ -32,7 +29,7 @@ function create() {
 	return pack;
 }
 
-// networked
+
 // De pot wordt geschud doormiddel van de Fisher–Yates shuffle
 // Source: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 function shuffle(pack) {
@@ -50,7 +47,7 @@ function shuffle(pack) {
 	return pack;
 }
 
-// networked
+
 // Van de pot afpakken
 // Huidige pack, aantal, kaarten op de hand
 function draw(pack, amount) {
@@ -62,27 +59,25 @@ function draw(pack, amount) {
 	return drawedCards;
 }
 
-// Herschudden van de pot
-/*function reshuffle(stack, pack) {
-	var topcard = stack[stack.length - 1];
-	stack.splice(0, 1);
-	var temppack;
-	if (pack.length > 0)
-		temppack = pack;
-	pack = stack;
-	if (temppack)
-		if (!temppack.length == 1)
-			$each(temppack, function (index, card) {
-				pack.push(card);
-			});
-		else
-			pack.push(temppack[0]);
-	shuffle(pack);
-	stack = [];
-	stack.push(topcard);
-}*/
 
-// networked
+// Herschudden van de pot
+function reshuffle(server, player) {
+	var topcard = server.stack[server.stack.length - 1];
+	server.stack.splice(0, 1);
+	
+	server.pack = server.stack;
+	shuffle(server.pack);
+	
+	server.stack = [];
+	server.stack.push(topcard);
+	
+	io.to(server.name).emit('update_game', { packLength: server.pack.length, stackLength: server.stack.length, currentStackCard: server.stack[server.stack.length - 1], currentPlayer: server.players[player] });
+	io.to(server.name).emit('message', 'Geen kaarten meer in de pot, herschudden');
+	
+	console.log("geen kaarten meer gevonden");
+}
+
+
 // Gooi eerste kaart op van de pot
 function start(pack, stack) {
 	var startingcard = pack[0]; // Haal startkaart uit de pot en sla deze op
@@ -90,26 +85,27 @@ function start(pack, stack) {
 		pack.splice(0, 1); // Haal de kaart uit de pot
 		stack.push(startingcard); // Voeg de kaart toe aan de aflegstapel
 	} else {
-		shuffle();
-		start();
+		shuffle(pack);
+		start(pack, stack);
 	}
 	
 }
 
-// networked
+// Checkt als kaart op gegooid mag worden of niet
 function possible(stack, card, takeAmount) {
 	var topcard = stack[stack.length - 1];
-	if (card.suit == topcard.suit && (topcard.card != 2 && takeAmount == 0) || 
-		card.suit == "J" || 
+	if (card.suit == topcard.suit && takeAmount == 0 || 
+		card.card == 0 && takeAmount == 0 || 
 		card.card == topcard.card || 
-		(topcard.suit == "J" && card.card == 2)
+		(topcard.card == 0 && card.card == 2) || 
+		(topcard.card == 2 && card.card == 0)
 		) {
 		return true;
 	}
 	return false;
 }
 
-// networked
+
 // Verander symbool
 function change(stack, suit) {
 	var topcard = stack[stack.length - 1];

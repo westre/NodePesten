@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Title of the document</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css">
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="js/jquery-2.2.1.min.js"></script>
-        <script src="client.js"></script>
-	</head>
+<head>
+    <title>Pesten - Rooms</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="client.js"></script>
+</head>
 
-	<body> 
-        <div id="body">
-            <script>
-                $(document).ready(function () {
-                    connect();
-                });
-            </script>
+<body>
+    <div id="body">
+        <script>
+            $(document).ready(function () {
+                connect();
+            });
+        </script>
 
-            <h1>Kies een spel en doe mee!</h1>
-            <div class="content">
-                <label for="player-name" class="center">Vul je naam in:</label>
-                <input type="text" name="player-name" id="inputName">
+        <h1>Kies een spel en doe mee!</h1>
+        <div class="content">
+            <label for="player-name" class="center">Vul je naam in:</label>
+            <input type="text" name="player-name" id="inputName">
 
-                <ul class="server-list" class="center"></ul>
-            </div></div> </body>
+            <ul class="server-list" class="center"></ul>
+        </div>
+    </div>
+</body>
 </html>

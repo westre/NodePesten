@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Title of the document</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css">
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="js/jquery-2.2.1.min.js"></script>
-        <script src="network-game.js"></script>
-        <script src="client.js"></script>
-	</head>
+<head>
+    <title>Pesten - Game</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="network-game.js"></script>
+    <script src="client.js"></script>
+</head>
 
-	<body>    
-       
-		<script>
-            $(document).ready(function () {
-                joinServer();  
-            });         
-        </script>
-        <div id="leftColumn">
-            <h1 id="gameTitle">Speelkamer</h1>
-            <button class="leave-server">Kamer uitgaan</button>
-            <button class="start-game">Spel starten</button>
-            <h3 class="server-name"></h3>
+<body>
 
-            <h3>Playerlist</h3>
-            <div class="player-list">
+    <script>
+        $(document).ready(function () {
+            joinServer();
+        });
+    </script>
+    <div id="header">
+        <h1 id="gameTitle">Speelkamer</h1>
+        <button class="leave-server">Kamer uitgaan</button>
+        <button class="start-game">Spel starten</button>
+        <h3 class="server-name"></h3>
+    </div>
+    <div id="leftColumn">
+
+        <h3>Playerlist</h3>
+        <div class="player-list">
+            <ul></ul>
+        </div>
+
+        <h3>Chatbox</h3>
+        <div class="chatbox">
+            <div class="chatbox-messages">
                 <ul></ul>
             </div>
-
-            <h3>Chatbox</h3>
-            <div class="chatbox">
-                <div class="chatbox-messages">
-                    <ul></ul>
-                </div>
-                <input class="chatbox-input" type="text">
-            </div>
+            <input class="chatbox-input" type="text">
         </div>
-       
-        
-        
-        <div id="table">
-            <img src="images/table.png" id="tableImg" />
-            <div class="stack remaining">
-                
-            </div>
-            <div class="textRemaining"></div>
+    </div>
 
 
-            <div class="stack played">
-                
-            </div>
-            <div class="textPlayed"></div>
+
+    <div id="table">
+        <div class="stack remaining">
 
         </div>
-        <h3>Jouw kaarten</h3>
-        <div class="hand">
+        <div class="textRemaining"></div>
+
+
+        <div class="stack played">
 
         </div>
-        
-        
-	</body>
+        <div class="textPlayed"></div>
+
+    </div>
+    <h3>Jouw kaarten</h3>
+    <div class="hand">
+
+    </div>
+
+
+</body>
 </html>

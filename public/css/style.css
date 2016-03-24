@@ -1,13 +1,13 @@
 @import url(https://fonts.googleapis.com/css?family=Lato);
 
+
 .test {
-	width: 100px;
-	height: 100px;
-	background-color: red;
+    width: 100px;
+    height: 100px;
+    background-color: red;
 }
 
 .chatbox {
-    
     text-align: left;
     width: 300px;
     height: 300px;
@@ -19,7 +19,6 @@
     width: 100%;
     height: 280px;
     overflow: scroll;
-    
 }
 
 .chatbox-input {
@@ -28,7 +27,6 @@
 }
 
 .player-list {
-    
     width: 300px;
     height: 200px;
     border: 2px solid #810000;
@@ -40,21 +38,17 @@
 
 .hand {
     display: block;
-        
 }
 
 .hand-card {
     width: 105px;
     height: 150px;
-    
     display: inline-block;
     vertical-align: bottom;
     cursor: pointer;
-    
-    
 }
 
-div.hand .hand-card{
+div.hand .hand-card {
     margin: 10px;
 }
 
@@ -66,15 +60,13 @@ div.hand .hand-card{
     width: 105px;
     height: 150px;
     z-index: 10;
-    
-   
 }
 
 .remaining {
     display: block;
     cursor: pointer;
     position: absolute;
-    left:10%;
+    left: 10%;
     top: 10%;
     width: 105px;
     height: 150px;
@@ -82,158 +74,168 @@ div.hand .hand-card{
     background-image: url(/images/backside.png);
     background-repeat: no-repeat;
     background-size: 105px 150px;
-    
-    
 }
 
-.textRemaining{
+.textRemaining {
     display: block;
     cursor: pointer;
     position: absolute;
-    left:10%;
+    left: 10%;
     top: 40%;
     width: 105px;
     height: 25px;
     z-index: 10;
-    background-color:#080640;
-    color:#FFFFFF;
+    background-color: #080640;
+    color: #FFFFFF;
     text-align: center;
 }
 
-.textPlayed{
+.textPlayed {
     display: block;
     cursor: pointer;
     position: absolute;
-    left:55%;
+    left: 55%;
     top: 40%;
     width: 105px;
     height: 25px;
     z-index: 10;
-    background-color:#080640;
-    color:#FFFFFF;
+    background-color: #080640;
+    color: #FFFFFF;
     text-align: center;
 }
 
-#playingCardsImg{
+.splash {
+    position: absolute;
+    background: url("../images/kaartspel.png") no-repeat 200px;
+    background-size: auto 75%;
+    background-repeat: no-repeat;
+    background-position: center bottom;
     text-align: center;
-    width:100%;
+    width: 100%;
     height: 100%;
+    bottom: 0px;
+    left: 0px;
+    overflow-x: hidden;
+    z-index: -1;
 }
 
-body{
-    display: block;
+body {
     background-color: #B28F61;
     width: 100%;
     height: 100%;
     font-family: 'Lato', sans-serif;
     font-size: 20px;
-    /*overflow-y: hidden;
-    overflow-x: hidden;*/
+    /*overflow-y: hidden;*/
+    overflow-x: hidden;
     color: #3B2F20;
-    
 }
 
-h1{
+h1 {
     color: #3B2F20;
     text-align: center;
     font-size: 60px;
 }
 
-h2{
-   
+h2 {
     color: #D3F0FF;
     text-align: center;
     font-size: 40px;
 }
 
-h3{
-    
+h3 {
 }
 
-a{
+a {
     color: #00994F;
-    color:lavenderblush;
-    text-decoration:none;
+    color: lavenderblush;
+    text-decoration: none;
 }
 
-a:hover{
+    a:hover {
+        color: #3B2F20;
+        transition: all 200ms ease-in;
+    }
+
+h2:hover {
     color: #3B2F20;
     transition: all 200ms ease-in;
 }
 
-h2:hover{
-    color: #3B2F20;
-    transition: all 200ms ease-in;
-}
-
-input{
+input {
     font-family: 'Lato', sans-serif;
 }
 
-li{
+li {
     text-align: center;
-    list-style-type:none;
+    list-style-type: none;
 }
 
-ul{
-    padding:0;
+ul {
+    padding: 0;
 }
-#table{
-    display:inline-block;
+
+
+#table {
+    display: inline-block;
     position: relative;
-}
-#tableImg{
-   
-   display: block;
-    width: 100%;
-    text-align: center;
-    z-index: -1;
+    background: url("../images/table.png");
+    width: 600px;
+    max-width: 600px;
+    height: 600px;
 }
 
-#body{
+@media(max-width:925px) {
+    #table {
+        height: 250px;
+        width: 93%;
+    }
+
+    .stack, .textRemaining, .textPlayed {
+        margin-top: 40px;
+        margin-left: 3%;
+    }
+}
+
+
+#body {
     display: table;
-    
     margin: 0px auto;
 }
 
-.center{
-    text-align:center;
+.center {
+    text-align: center;
 }
 
-.totaltable{
-    display:inline-block;
-
+.totaltable {
+    display: inline-block;
 }
 
-#leftColumn{
-    display:inline-block;
+#leftColumn {
+    display: inline-block;
 }
 
-#gameTitle{
+#gameTitle {
     text-align: left;
 }
 
-button{
-    background-color:#3B2F20;
-    color:#B28F61;
+button {
+    background-color: #3B2F20;
+    color: #B28F61;
     border: 0px;
     padding: 10px;
     margin: 5px;
 }
 
-button:hover{
-    color: #D3F0FF;
-    transition: all 200ms ease-in;
-}
+    button:hover {
+        color: #D3F0FF;
+        transition: all 200ms ease-in;
+    }
 
-#inputName{
+#inputName {
     text-align: center;
     margin: 10px;
 }
 
-.content{
+.content {
     text-align: center;
 }
-
-
-
