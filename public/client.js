@@ -39,7 +39,7 @@ $(document).ready(function () {
 	
 	// voor de spelers zodat ze op hun kaart kunnen klikken en het ook verwerkt wordt
 	$(".hand").on("click", ".hand-card", function () {
-		if (!gameStarted) return;
+		if (!gameStarted) { return; }
 		
 		var card = $(this).data('card');
 		var suit = $(this).data('suit');
@@ -62,7 +62,7 @@ $(document).ready(function () {
 	});
 	
 	$(document).on("click", ".remaining", function () {
-		if (!gameStarted) return;
+		if (!gameStarted) { return; }
 		
 		socket.emit('is_it_my_turn', server, function (myTurn) {
 			if (myTurn) {
@@ -174,7 +174,7 @@ function onReceivedChatMessage(data) {
 	
 	var height = 0;
 	$('.chatbox-messages ul li').each(function (i, value) {
-		height += parseInt($(this).height());
+		height += parseInt($(this).height(), 10);
 	});
 	height += '';
 	
@@ -216,8 +216,9 @@ function onPlayerUpdateHand(data) {
 	
 	$('.hand').html('');
 	$.each(data, function (index, card) {
-		if (card != null)
+		if (card !== null) {
 			$('.hand').append('<div class="hand-card" data-card="' + card.card + '" data-suit="' + card.suit + '"></div>');
+        }
 	});
 	backgroundDynamic();
 }

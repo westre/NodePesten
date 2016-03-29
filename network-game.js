@@ -18,14 +18,19 @@ function create() {
 	
 	var count = 0;
 	// Voeg kaarten toe
-	for (s = 0; s < suits.length; s++) // Voor elke suit
+	for (s = 0; s < suits.length; s++) { // Voor elke suit
 		for (c = 1; c <= cards; c++) { // Doorloop 13 getallen
-			pack[count++] = { card: c, suit: suits[s] }; // Voer kaart object toe aan de pot
+			pack[count] = { card: c, suit: suits[s] }; // Voer kaart object toe aan de pot
+            count++;
 		}
+    }
+    
 	// Voeg Jokers toe
-	for (i = 0; i < 2; i++)
-		pack[count++] = { card: 0, suit: "J" }; // 0 = Joker, J = Joker
-	
+	for (i = 0; i < 2; i++) {
+		pack[count] = { card: 0, suit: "J" }; // 0 = Joker, J = Joker
+        count++;
+    }
+    
 	return pack;
 }
 
@@ -81,7 +86,7 @@ function reshuffle(server, player) {
 // Gooi eerste kaart op van de pot
 function start(pack, stack) {
 	var startingcard = pack[0]; // Haal startkaart uit de pot en sla deze op
-	if (startingcard.card != 0) { // Niet beginnen met een joker
+	if (startingcard.card !== 0) { // Niet beginnen met een joker
 		pack.splice(0, 1); // Haal de kaart uit de pot
 		stack.push(startingcard); // Voeg de kaart toe aan de aflegstapel
 	} else {
@@ -94,12 +99,12 @@ function start(pack, stack) {
 // Checkt als kaart op gegooid mag worden of niet
 function possible(stack, card, takeAmount) {
 	var topcard = stack[stack.length - 1];
-	if (card.suit == topcard.suit && takeAmount == 0 || 
-		card.card == 0 && takeAmount == 0 || 
-		card.card == topcard.card || 
-		(topcard.card == 0 && card.card == 2) || 
-		(topcard.card == 2 && card.card == 0)
-		) {
+	if (card.suit === topcard.suit && takeAmount === 0 || 
+		card.card === 0 && takeAmount === 0 || 
+		card.card === topcard.card || 
+		(topcard.card === 0 && card.card === 2) || 
+		(topcard.card === 2 && card.card === 0)) 
+        {
 		return true;
 	}
 	return false;
@@ -119,20 +124,23 @@ function fancy(origCard, toString) {
 	var card = { card: origCard.card, suit: origCard.suit };
 	switch (card.suit) {
 		case "H":
-			card.suit = "Harten"
+			card.suit = "Harten";
 			break;
 		case "K":
-			card.suit = "Klaver"
+			card.suit = "Klaver";
 			break;
 		case "S":
-			card.suit = "Schoppen"
+			card.suit = "Schoppen";
 			break;
 		case "R":
-			card.suit = "Ruiten"
+			card.suit = "Ruiten";
 			break;
+        default:
+            card.card = null;
+            break;
 	}
 	
-	if (!(card.card > 1 && card.card < 10))
+	if (!(card.card > 1 && card.card < 10)) {
 		switch (card.card) {
 			case 0:
 				card.card = "Joker";
@@ -149,15 +157,23 @@ function fancy(origCard, toString) {
 			case 13:
 				card.card = "Koning";
 				break;
+            default:
+                card.card = null;
+                break;
 		}
+    }
 	
-	if (toString)
-		if (origCard.card == 0)
+	if (toString) {
+		if (origCard.card === 0) {
 			return card.card;
-		else
+        }
+		else {
 			return card.suit + " " + card.card;
-	else
+        }
+    }
+	else {
 		return card;
+    }
 }
 
 

@@ -142,7 +142,8 @@ h2 {
     font-size: 40px;
 }
 
-h3 {
+.testtable {
+    text-align: center;
 }
 
 a {

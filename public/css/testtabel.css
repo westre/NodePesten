@@ -1,0 +1,67 @@
+table {
+    border: 1px solid gray;
+    border-collapse: collapse;
+}
+
+li {
+    text-align: left !important;
+}
+
+h2 {
+    text-align: left !important;
+}
+
+table, th, td {
+    border: 1px solid gray;
+}
+
+td {
+    padding: 5px;
+}
+
+.green {
+    background-color: green;
+}
+
+.red {
+    background-color: red;
+}
+
+.grey {
+    background-color: grey;
+}
+
+.orange {
+    background-color: orange;
+}
+
+.browser-logo {
+    width: 50px;
+    display: block;
+}
+
+.legend-item {
+    display: inline-block;
+    padding: 2px;
+}
+
+.legend {
+    margin-top: 25px;
+}
+
+.explanation {
+    margin-top: 25px;
+}
+
+.explanation ul {
+    list-style-type: none;
+}
+
+.testcases {
+    margin-top: 25px;
+}
+
+.testcases .success {
+    width: 100px;
+    background-color: green;
+}

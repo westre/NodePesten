@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pesten!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="client.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/testtabel.css">
+</head>
+
+<body>
+    <h1>Testtabel</h1>
+    <div class="test-results">
+        <table>
+            <tr>
+                <td>website/opdracht</td>
+                <td colspan="6">Portfolio opdracht Week 3</td>
+            </tr>
+            <tr>
+                <td>datum</td>
+                <td colspan="6">26-02-2016</td>
+            </tr>
+            <tr>
+                <td>valide html5</td>
+                <td colspan="6" class="green"></td>
+            </tr>
+            <tr>
+                <td>valide css3</td>
+                <td colspan="6" class="green"></td>
+            </tr>
+            <tr>
+                <td>valide javascript</td>
+                <td colspan="6" class="green"></td>
+            </tr>
+            <tr>
+                <td>browser</td>
+                <td colspan="3">
+                    <img class="browser-logo" src="http://www.browser-watch.com/wp-content/uploads/2010/09/ie9-logo.png" alt="IE logo" />IE
+                </td>
+                <td>
+                    <img class="browser-logo" src="https://www.mozilla.org/media/img/styleguide/identity/firefox/guidelines-logo.7ea045a4e288.png" alt="FF logo" />Firefox
+                </td>
+                <td>
+                    <img class="browser-logo" src="http://img.talkandroid.com/uploads/2015/11/Chrome-Logo.png" alt="Chrome logo" /> Chrome
+                </td>
+                <td>
+                    <img class="browser-logo" src="http://media.opera.com/media/images/icon/Opera_512x512.png" alt="Opera logo" /> Opera
+                </td>
+            </tr>
+            <tr><td>versie</td><td>9</td><td>10</td><td>11</td><td>37</td><td>42</td><td>12.16</td></tr>
+            <tr><td>design</td><td class="green"></td><td class="green"></td><td class="green"></td><td class="green"></td><td class="green"></td><td class="green"></td></tr>
+        </table>
+        
+        <div class="legend">
+            <h3>Legenda</h3>
+            <div class="green legend-item">werkt goed</div>
+            <div class="orange legend-item">werkt gedeeltelijk</div>
+            <div class="red legend-item">werkt niet</div>
+            <div class="grey legend-item">niet getest</div>
+        </div>
+        
+        <div class="explanation">
+            <h2>Onderbouwing van resultaten</h2>
+            <p><b>HTML5 validatie:</b> index.html, game.html, serverlist.html, start.html zijn HTML5 valide, gebruikte validator: <a href="https://html5.validator.nu/">https://html5.validator.nu/</a></p>
+            <p><b>CSS3 validatie:</b> style.css is CSS3 valide, gebruikte validator: <a href="https://jigsaw.w3.org/css-validator/">https://jigsaw.w3.org/css-validator/</a></p>
+            <p><b>JS validatie:</b> client.js, network-game.js, server.js zijn JS valide, gebruiker validator: <a href="http://www.javascriptlint.com/">http://www.javascriptlint.com/</a></p>
+            
+            <h2>Screenshots</h2>
+            <ul>
+                <li>IE <a href="https://www.browserstack.com/screenshots/c680467782b2eef48d79b24f1e91713f531a7fad/win7_ie_9.0.jpg">9</a>, <a href="http://i.imgur.com/wu1ILbu.png">10</a>, <a href="https://www.browserstack.com/screenshots/c680467782b2eef48d79b24f1e91713f531a7fad/win8.1_ie_11.0.jpg">11</a></li>
+                <li>Firefox <a href="https://www.browserstack.com/screenshots/c680467782b2eef48d79b24f1e91713f531a7fad/win8.1_firefox_37.0.jpg">37</a></li>
+                <li>Chrome <a href="https://www.browserstack.com/screenshots/c680467782b2eef48d79b24f1e91713f531a7fad/win8.1_chrome_42.0.jpg">42</a></li>
+                <li>Opera <a href="https://www.browserstack.com/screenshots/c680467782b2eef48d79b24f1e91713f531a7fad/win8.1_opera_12.16.jpg">12.16</a></li>
+            </ul>
+        </div>
+        
+        <h2>Testcases</h2>
+        <table class="testcases">
+            <tr><td>Als gebruiker wil ik een naam kunnen invoeren en gebruiken</td><td class="success"></td></tr>    
+            <tr><td>Als gebruiker wil ik een overzicht met kamers kunnen zien</td><td class="success"></td></tr> 
+            <tr><td>Als gebruiker wil ik een kamer kunnen ingaan</td><td class="success"></td></tr> 
+            <tr><td>Als gebruiker wil ik een kamer kunnen uitgaan</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik met andere gebruikers kunnen chatten</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik waar mogelijk een kaart kunnen plaatsen</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik waar mogelijk een kaart kunnen pakken</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik het spel kunnen starten</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik een overzicht met alle spelers</td><td class="success"></td></tr>
+            <tr><td>Als gebruiker wil ik een overzicht met al mijn kaarten</td><td class="success"></td></tr>
+        </table>
+    </div>
+</body>
+</html>
