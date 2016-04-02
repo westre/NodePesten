@@ -240,3 +240,12 @@ button {
 .content {
     text-align: center;
 }
+
+.madeby {
+    text-align: center;
+    margin: 0px;
+}
+
+.title-header {
+    margin-bottom: 0px;
+}
