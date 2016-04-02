@@ -269,7 +269,7 @@ io.on('connection', function (socket) {
 						}
 						else {
 							fn(false);
-							io.to(player).emit('message', 'das ist nicht mogelijk gozert');
+							io.to(player).emit('message', 'Dat is niet mogelijk.');
 						}
 					}
 				}
